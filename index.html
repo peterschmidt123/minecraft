@@ -25,8 +25,7 @@
       position: relative; z-index: 1;
       max-width: 800px; margin: 3rem auto;
       padding: 2rem; background: rgba(44,62,80,0.85);
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.7);
+      border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.7);
       animation: fadeIn 1s;
     }
     h1, h2 { color: #00ccff; margin-bottom: 1rem; }
@@ -36,29 +35,20 @@
       margin-right: 1rem; border: 1px solid #ccc;
       border-radius: 6px; font-size: 1rem;
     }
-    .start-btn, .next-btn {
+    .start-btn, .next-btn, .mute-btn {
       background: #00ccff; color: #1a1a1a;
       padding: 0.6rem 1.2rem; border: none;
       border-radius: 6px; cursor: pointer;
       margin-top: 1rem; transition: transform 0.2s;
       font-size: 1rem;
     }
-    .start-btn:hover, .next-btn:hover { transform: scale(1.05); }
+    .start-btn:hover, .next-btn:hover, .mute-btn:hover {
+      transform: scale(1.05);
+    }
     .mute-btn {
-      position: fixed; top: 10px; right: 10px;
-      background: #00ccff; color: #1a1a1a;
-      border: none; border-radius: 6px;
-      padding: 0.4rem 0.8rem; cursor: pointer;
-      z-index: 2; font-size: 1.2rem;
+      position: fixed; top: 10px; right: 10px; z-index: 2;
     }
     #timer { margin-top: 1rem; font-weight: bold; }
-    #mini-game { text-align: center; margin: 1rem 0; }
-    .click-block {
-      width: 100px; height: 100px;
-      background: url('assets/diamond_block.png') no-repeat center;
-      background-size: contain; margin: 0 auto;
-      cursor: pointer;
-    }
     .hidden { display: none; }
     @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
   </style>
@@ -74,7 +64,7 @@
   <!-- Úvod -->
   <div class="container" id="intro">
     <h1>Escape Room: Minecraft Zlomky</h1>
-    <p>Ocitli ste sa magicky prenesení do sveta Minecraft. Noc sa blíži a vy potrebujete prežiť: získať potiony, postaviť úkryt, rozdeliť suroviny, vyriešiť logické hádanky a aktivovať portál späť domov!</p>
+    <p>Ocitli ste sa prenesení do sveta Minecraft. Noc sa blíži a vy musíte vyriešiť hádanky so zlomkami a geometriou, aby ste aktivovali portál späť domov!</p>
     <button class="start-btn" onclick="startAdventure()">Začať dobrodružstvo</button>
   </div>
 
@@ -85,55 +75,31 @@
     const tasks = [
       {
         background: 'assets/forest.gif',
-        title: 'Úloha 1: Zbieranie potionov',
-        context: 'V lese ste z jednej fľaše odobrali 2 diely z 6 a potom ďalšie 3. Koľko dielov fľaše máte spolu?',
-        inputs: ['text'],
-        answer: 5/6,
-        time: 120
-      },
-      {
-        background: 'assets/house.gif',
-        title: 'Úloha 2: Chýbajúce zlato',
-        context: 'Na vyrobenie zlatej helmy potrebujete 4 diely zo 6, ale máte iba 1. Koľko dielov zlata vám chýba?',
-        inputs: ['text'],
-        answer: 3/6,
-        time: 120
-      },
-      {
-        background: 'assets/diamond_cave.gif',
-        title: 'Minihra: Nájdi diamant',
-        context: 'Kliknite na diamantový blok presne 5-krát, aby ste získali magický diamant!',
-        type: 'click',
-        clicksRequired: 5,
-        time: 60
-      },
-      {
-        background: 'assets/mining.gif',
-        title: 'Úloha 3: Rozdelenie zásob',
-        context: 'Máte 6 dielov zásob. Strážca si vezme 1 diel, vy 2 diely a priateľ tiež 2 diely. Koľko dielov ostane?',
-        inputs: ['text'],
-        answer: 1/6,
+        title: 'Úloha 1: Steny tvrze (pätiny + obvod)',
+        context: 'Staviate hrad so stranami 4 a 6 blokov. Najprv vypočítajte obvod tvrze. Potom použite 3/5 z tohto počtu na postavenie prednej steny. Koľko blokov to bude?',
+        inputs: ['text','text'],
+        answer: [20, 12],
         time: 150
       },
       {
-        background: 'assets/portal.gif',
-        title: 'Úloha 4: Stavba ohrady',
-        context: 'Postavili ste ohradu s rozmermi 5 × 3 bloky. Koľko blokov potrebujete na jej celý obvod?',
-        inputs: ['text'],
-        answer: 16,
-        time: 90
+        background: 'assets/house.gif',
+        title: 'Úloha 2: Ťažba diamantov (šestiny + priemer)',
+        context: 'V bani máte 12 diamantov. Prvú hodinu získate 2/6 z celkového počtu, druhú hodinu ďalších 1/6. Koľko diamantov máte spolu a koľko diamantov ste získali v priemere za hodinu?',
+        inputs: ['text','text'],
+        answer: [6, 3],
+        time: 180
       },
       {
-        background: 'assets/portal.gif',
-        title: 'Úloha 5: Najsilnejší elixír',
-        context: 'Máte elixíry s rôznou silou: 2 diely zo 6, 4 diely zo 6 a 3 diely zo 6. Ktorý je najsilnejší?',
-        inputs: ['text'],
-        answer: 4/6,
-        time: 120
+        background: 'assets/mining.gif',
+        title: 'Úloha 3: Nočná lúka (osminy + plocha)',
+        context: 'Máte lúku veľkú 8 × 5 blokov. V noci ju opustilo 3/8 plochy. Vypočítajte celkovú plochu lúky a koľko blokov plochy zostalo.',
+        inputs: ['text','text'],
+        answer: [40, 25],
+        time: 150
       }
     ];
 
-    let current = -1, timer, clicks = 0, muted = false;
+    let current = -1, timer, muted = false;
     const intro = document.getElementById('intro');
     const taskContainer = document.getElementById('task-container');
     const bgMusic = document.getElementById('bg-music');
@@ -155,12 +121,11 @@
 
     function nextTask() {
       current++;
-      clicks = 0;
       if (current >= tasks.length) return finishAdventure();
-      showPortalTransition();
+      showPortal();
     }
 
-    function showPortalTransition() {
+    function showPortal() {
       taskContainer.classList.add('hidden');
       document.body.style.backgroundImage = "url('assets/portal.gif')";
       setTimeout(loadTask, 1500);
@@ -173,30 +138,14 @@
       taskContainer.innerHTML = `
         <h2>${t.title}</h2>
         <p>${t.context}</p>
-        ${t.type === 'click'
-          ? `<div id="mini-game">
-               <div class="click-block" onclick="handleClick()"></div>
-               <p id="click-count">0 / ${t.clicksRequired}</p>
-             </div>`
-          : `<div id="inputs">
-               ${t.inputs.map((_,i) => 
-                 `<input type="text" id="ans${i}" placeholder="Odpoveď">`
-               ).join('')}
-             </div>
-             <button class="next-btn" onclick="checkAnswer()">Skontrolovať</button>`}
+        <div id="inputs">
+          ${t.inputs.map((_,i) => `<input type="text" id="ans${i}" placeholder="Tvoj výsledok">`).join('')}
+        </div>
+        <button class="next-btn" onclick="checkAnswer()">Skontrolovať</button>
         <div id="feedback"></div>
         <div id="timer"></div>
       `;
       startTimer(tasks[current].time);
-    }
-
-    function handleClick() {
-      clicks++;
-      document.getElementById('click-count').textContent = `${clicks} / ${tasks[current].clicksRequired}`;
-      if (clicks >= tasks[current].clicksRequired) {
-        clearInterval(timer);
-        celebrateAndContinue();
-      }
     }
 
     function checkAnswer() {
@@ -204,17 +153,14 @@
       let ok = true;
       t.inputs.forEach((_,i) => {
         const val = parseFraction(document.getElementById(`ans${i}`).value.trim());
-        if (Math.abs(val - t.answer) > 0.01) ok = false;
+        if (Math.abs(val - t.answer[i]) > 0.01) ok = false;
       });
-      if (ok) {
-        clearInterval(timer);
-        celebrateAndContinue();
-      } else {
-        document.getElementById('feedback').textContent = '❌ Skús znova';
-      }
+      if (ok) celebrateAndContinue();
+      else document.getElementById('feedback').textContent = '❌ Skús znova';
     }
 
     function celebrateAndContinue() {
+      clearInterval(timer);
       bgMusic.pause();
       successSound.currentTime = 0;
       successSound.play();
@@ -250,8 +196,9 @@
       taskContainer.classList.add('hidden');
       document.body.style.backgroundImage = "url('assets/celebration.gif')";
       taskContainer.innerHTML = `
-        <h2>🎉 Úspešne ste aktivovali portál domov! 🎉</h2>
-        <p>Gratulujeme, vaša matematická bystrosť vás zachránila.</p>`;
+        <h2>🎉 Portál je aktivovaný! 🎉</h2>
+        <p>Gratulujeme, vaša matematická šikovnosť vás zachránila.</p>
+      `;
       taskContainer.classList.remove('hidden');
     }
   </script>
