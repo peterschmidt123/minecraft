@@ -70,111 +70,111 @@
     const tasks = [
       {
         background: 'assets/forest.gif',
-        title: 'Úloha 1: Steny tvrze (pätiny + obvod)',
-        context: 'Staviate hrad so stranami 4 a 6 blokov. Vypočítajte obvod tvrze. Potom 3/5 z tohto počtu vyneste na prednú stenu.',
+        title: 'Úloha 1: Steny tvrze',
+        context: 'Postavili ste hrad so stranami 4 a 6 blokov. Vypočítajte obvod a potom z tohto počtu vyberte 3/5 na prednú stenu.',
         inputs: ['text','text'],
         answer: [20, 12],
         time: 150
       },
       {
         background: 'assets/house.gif',
-        title: 'Úloha 2: Diamantové turnaje (šestiny + priemer)',
-        context: 'V bani máte 12 diamantov. Za prvú hodinu získate 2/6 z celku, za druhú 1/6. Koľko diamantov máte spolu a koľko priemerne za hodinu?',
+        title: 'Úloha 2: Diamantové turnaje',
+        context: 'V bani máte 12 diamantov. Za prvú hodinu získate 2/6 z celku, za druhú 1/6. Spočítajte, koľko diamantov máte spolu a aký je priemerný zisk za hodinu.',
         inputs: ['text','text'],
         answer: [6, 3],
         time: 180
       },
       {
         background: 'assets/mining.gif',
-        title: 'Úloha 3: Nočná lúka (osminy + plocha)',
-        context: 'Máte lúku 8 × 5 blokov. V noci opustí lúku 3/8 plochy. Vypočítajte celkovú plochu a zostávajúcu plochu.',
+        title: 'Úloha 3: Nočná lúka',
+        context: 'Máte lúku 8 × 5 blokov. V noci opustí lúku 3/8 plochy. Vypočítajte celkovú plochu a plochu, ktorá zostala.',
         inputs: ['text','text'],
         answer: [40, 25],
         time: 150
       },
       {
         background: 'assets/furnace.gif',
-        title: 'Úloha 4: Drevené dosky (polovice + násobenie)',
-        context: 'Máte 20 kmeňov. Polovicu z nich spracujete na dosky, pričom z každého kmeňa získate 4 dosky. Koľko dosiek máte?',
+        title: 'Úloha 4: Drevené dosky',
+        context: 'Máte 20 kmeňov. Polovicu spracujete na dosky, pričom z každého kmeňa dostanete 4 dosky. Koľko dosiek získate?',
         inputs: ['text'],
         answer: [40],
         time: 120
       },
       {
         background: 'assets/portal.gif',
-        title: 'Úloha 5: Semená úspechu (štvrtiny + obsah)',
-        context: 'Pole je obdĺžnik 12 × 8 blokov. Zasiať musíte 1/4 plochy semien. Koľko blokov obsadia semená?',
+        title: 'Úloha 5: Semená úspechu',
+        context: 'Pole má rozmery 12 × 8 blokov. Zasiať musíte 1/4 jeho plochy. Koľko blokov bude obsadených semienkami?',
         inputs: ['text'],
         answer: [24],
         time: 120
       },
       {
         background: 'assets/forest.gif',
-        title: 'Úloha 6: Pločinky z jabĺk (štvrtiny + scitanie)',
-        context: 'Na placku potrebujete 3/4 hrnca jabĺk a 1/4 hrnca múky. Pripravujete 2 placky. Koľko hrncov jabĺk a múky miniete?',
+        title: 'Úloha 6: Pločinky z jabĺk',
+        context: 'Na jednu placku potrebujete 3/4 hrnca jabĺk a 1/4 hrnca múky. Pripravujete dve placky. Koľko hrncov jabĺk a múky spotrebujete?',
         inputs: ['text','text'],
         answer: [1.5, 0.5],
         time: 150
       },
       {
         background: 'assets/diamond_cave.gif',
-        title: 'Úloha 7: Redstone brány (tretiny + scitanie)',
-        context: 'Prvý portál potrebuje 1/3 jednotky redstone, druhý 2/3 jednotky. Koľko jednotiek potrebujete spolu?',
+        title: 'Úloha 7: Redstone brány',
+        context: 'Prvá brána potrebuje 1/3 jednotky redstone, druhá 2/3 jednotky. Koľko jednotiek redstone potrebujete spolu?',
         inputs: ['text'],
         answer: [1],
         time: 90
       },
       {
         background: 'assets/portal.gif',
-        title: 'Úloha 8: Finálna energia (pätiny + scitanie)',
-        context: 'Portál vyžaduje fragmenty energie: 1/5, 2/5 a 2/5. Spočítajte súčet.',
+        title: 'Úloha 8: Finálna energia',
+        context: 'Portál vyžaduje fragmenty energie: 1/5, 2/5 a 2/5 jednotky. Spočítajte ich súčet.',
         inputs: ['text'],
         answer: [1],
         time: 120
       }
     ];
 
-    let current = -1, timer, muted = false, clicks = 0;
+    let current = -1, timer, muted = false;
     const intro = document.getElementById('intro'),
           taskContainer = document.getElementById('task-container'),
           bgMusic = document.getElementById('bg-music'),
           successSound = document.getElementById('success-sound'),
           muteBtn = document.querySelector('.mute-btn');
 
-    function toggleMute(){
+    function toggleMute() {
       muted = !muted;
       bgMusic.muted = muted;
       successSound.muted = muted;
-      muteBtn.textContent = muted?'🔇':'🔊';
+      muteBtn.textContent = muted ? '🔇' : '🔊';
     }
 
-    function startAdventure(){
+    function startAdventure() {
       intro.classList.add('hidden');
       bgMusic.play();
       nextTask();
     }
 
-    function nextTask(){
+    function nextTask() {
       current++;
-      if(current>=tasks.length) return finishAdventure();
+      if (current >= tasks.length) return finishAdventure();
       showPortal();
     }
 
-    function showPortal(){
+    function showPortal() {
       taskContainer.classList.add('hidden');
-      document.body.style.backgroundImage="url('assets/portal.gif')";
-      setTimeout(loadTask,1500);
+      document.body.style.backgroundImage = "url('assets/portal.gif')";
+      setTimeout(loadTask, 1500);
     }
 
-    function loadTask(){
-      const t=tasks[current];
-      document.body.style.backgroundImage=`url('${t.background}')`;
+    function loadTask() {
+      const t = tasks[current];
+      document.body.style.backgroundImage = `url('${t.background}')`;
       taskContainer.classList.remove('hidden');
-      taskContainer.innerHTML=`
+      taskContainer.innerHTML = `
         <h2>${t.title}</h2>
         <p>${t.context}</p>
         <div id="inputs">
-          ${t.inputs.map((_,i)=>
+          ${t.inputs.map((_,i) =>
             `<input type="text" id="ans${i}" placeholder="Odpoveď">`
           ).join('')}
         </div>
@@ -185,56 +185,55 @@
       startTimer(tasks[current].time);
     }
 
-    function checkAnswer(){
-      const t=tasks[current];
-      let ok=true;
-      t.inputs.forEach((_,i)=>{
-        const val=parseFraction(document.getElementById(`ans${i}`).value.trim());
-        if(Array.isArray(t.answer)){
-          if(Math.abs(val - t.answer[i])>0.01) ok=false;
-        } else if(Math.abs(val - t.answer)>0.01) ok=false;
+    function checkAnswer() {
+      const t = tasks[current];
+      let ok = true;
+      t.inputs.forEach((_,i) => {
+        const val = parseFraction(document.getElementById(`ans${i}`).value.trim());
+        const ans = Array.isArray(t.answer) ? t.answer[i] : t.answer;
+        if (Math.abs(val - ans) > 0.01) ok = false;
       });
-      if(ok) celebrateAndContinue();
-      else document.getElementById('feedback').textContent='❌ Skús znova';
+      if (ok) celebrateAndContinue();
+      else document.getElementById('feedback').textContent = '❌ Skús znova';
     }
 
-    function celebrateAndContinue(){
+    function celebrateAndContinue() {
       clearInterval(timer);
       bgMusic.pause();
-      successSound.currentTime=0;
+      successSound.currentTime = 0;
       successSound.play();
-      successSound.onended=()=>{
-        if(!muted) bgMusic.play();
+      successSound.onended = () => {
+        if (!muted) bgMusic.play();
         nextTask();
       };
     }
 
-    function startTimer(sec){
+    function startTimer(sec) {
       clearInterval(timer);
-      let s=sec;
-      document.getElementById('timer').textContent=`⏱️ ${s}s`;
-      timer=setInterval(()=>{
+      let s = sec;
+      document.getElementById('timer').textContent = `⏱️ ${s}s`;
+      timer = setInterval(() => {
         s--;
-        document.getElementById('timer').textContent=`⏱️ ${s}s`;
-        if(s<=0){
+        document.getElementById('timer').textContent = `⏱️ ${s}s`;
+        if (s <= 0) {
           clearInterval(timer);
-          document.getElementById('feedback').textContent='⛔ Čas vypršal';
+          document.getElementById('feedback').textContent = '⛔ Čas vypršal';
         }
-      },1000);
+      }, 1000);
     }
 
-    function parseFraction(s){
-      if(s.includes('/')){
-        const [n,d]=s.split('/').map(Number);
+    function parseFraction(s) {
+      if (s.includes('/')) {
+        const [n,d] = s.split('/').map(Number);
         return n/d;
       }
-      return parseFloat(s)||0;
+      return parseFloat(s) || 0;
     }
 
-    function finishAdventure(){
+    function finishAdventure() {
       taskContainer.classList.add('hidden');
-      document.body.style.backgroundImage="url('assets/celebration.gif')";
-      taskContainer.innerHTML=`
+      document.body.style.backgroundImage = "url('assets/celebration.gif')";
+      taskContainer.innerHTML = `
         <h2>🎉 Portál je aktivovaný! 🎉</h2>
         <p>Gratulujeme, vaša matematická šikovnosť vás zachránila.</p>`;
       taskContainer.classList.remove('hidden');
