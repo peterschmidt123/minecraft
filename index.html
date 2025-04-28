@@ -3,189 +3,242 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Escape Room: Rozdelené tajomstvo</title>
+  <title>Escape Room: Minecraft Dobrodružstvo</title>
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: #1a1a1a;
-      color: #f2f2f2;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
+      color: #f2f2f2;
+      background-size: cover;
+      background-position: center;
+      transition: background-image 1s ease-in-out;
+    }
+    .overlay {
+      background-color: rgba(0,0,0,0.6);
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
     }
     .container {
-      padding: 2rem;
+      position: relative;
+      z-index: 1;
       max-width: 800px;
-      margin: auto;
-      background-color: #2c3e50;
+      margin: 3rem auto;
+      padding: 2rem;
+      background-color: rgba(44,62,80,0.8);
       border-radius: 12px;
-      margin-top: 3rem;
-      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+      box-shadow: 0 0 20px rgba(0,0,0,0.7);
     }
-    h1, h2 {
-      color: #00ccff;
-    }
-    p {
-      line-height: 1.6;
-    }
-    .start-btn, .next-btn {
-      background-color: #00ccff;
-      color: #1a1a1a;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 1rem;
-      font-size: 1rem;
-      transition: transform 0.2s;
-    }
-    .start-btn:hover, .next-btn:hover {
-      transform: scale(1.05);
-    }
-    .hidden {
-      display: none;
-    }
-    .task-section {
-      margin-top: 2rem;
-    }
-    .background {
-      animation: unlock 2s ease-in-out;
-    }
-    @keyframes unlock {
-      from {opacity: 0; transform: scale(0.95);}
-      to {opacity: 1; transform: scale(1);}
-    }
-    input[type="text"] {
+    h1, h2 { color: #00ccff; margin-bottom: 1rem; }
+    p { margin-bottom: 1rem; line-height: 1.5; }
+    input, button { font-size: 1rem; }
+    input[type=text] {
       padding: 0.6rem;
-      width: 200px;
+      width: calc(50% - 1rem);
+      margin-right: 1rem;
       border: 1px solid #ccc;
       border-radius: 6px;
+    }
+    .start-btn, .next-btn, .mute-btn {
+      background-color: #00ccff;
+      color: #1a1a1a;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
       margin-top: 1rem;
-      font-size: 1rem;
+      transition: transform 0.2s;
     }
-    #timer {
-      font-weight: bold;
-      margin-top: 10px;
+    .start-btn:hover, .next-btn:hover, .mute-btn:hover { transform: scale(1.05); }
+    #timer { margin-top: 1rem; font-weight: bold; }
+    #mini-game { text-align: center; }
+    .click-block {
+      width: 100px; height: 100px;
+      background: url('assets/diamond_block.png') no-repeat center;
+      background-size: contain;
+      margin: 1rem auto;
+      cursor: pointer;
     }
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+    .fade-in { animation: fadeIn 1s; }
   </style>
 </head>
 <body>
-  <div class="container" id="intro">
-    <h1>Escape Room: Rozdelené tajomstvo</h1>
-    <p>
-      V škole sa koná tajomná súťaž pre najbystrejších žiakov 5. ročníka. Boli ste zamknutí do starej časti budovy, kde sa nachádza sedem zapečatených miestností. Každá skrýva jednu matematickú úlohu. Ak ju vyriešite, miestnosť sa odomkne, prebliknú svetlá a dvere sa pootvoria – pripravené na váš ďalší krok.
-    </p>
-    <p>
-      Ste pripravení otestovať svoju logiku a prebojovať sa na slobodu pomocou svojich matematických schopností?
-    </p>
-    <button class="start-btn" onclick="startGame()">Začať úlohy</button>
+  <div class="overlay"></div>
+
+  <audio id="bg-music" src="music/ambient.mp3" loop autoplay></audio>
+  <audio id="success-sound" src="music/success.mp3"></audio>
+  <button class="mute-btn" onclick="toggleMute()">🔊</button>
+
+  <div class="container fade-in" id="intro">
+    <h1>Escape Room: Minecraft Dobrodružstvo</h1>
+    <p>V škole ste objavili magický portál, ktorý vás vtiahol do sveta Minecraft. Je noc plná nebezpečenstva – musíte prežiť, postaviť úkryt, získať jedlo aj zdroje a nakoniec aktivovať portál domov!</p>
+    <button class="start-btn" onclick="startAdventure()">Vstúp do portálu</button>
   </div>
 
-  <div class="container hidden task-section background" id="task-container">
-    <h2 id="task-title"></h2>
-    <p id="task-context"></p>
-    <p><strong>Otázka:</strong> <span id="task-question"></span></p>
-    <input type="text" id="task-answer" placeholder="Tvoja odpoveď">
-    <button class="next-btn" onclick="checkAnswer()">Skontrolovať</button>
-    <div id="feedback"></div>
-    <div id="timer"></div>
-  </div>
+  <div class="container hidden" id="task-container"></div>
 
   <script>
     const tasks = [
       {
-        title: "Úloha 1: Školská knižnica",
-        context: "Na starých policiach je 125 kníh. Chceš ich rozdeliť do políc, pričom na každej bude rovnaký počet. Koľko kníh bude na jednej polici, ak ich rozdelíš do 8 políc? (so zvyškom)",
-        question: "Koľko kníh bude na jednej polici, ak ich rozdelíš do 8 políc? (Zvyšok ignoruj)",
-        answer: "15"
+        background: 'assets/forest.gif',
+        title: 'Úloha 1: Prežitie – drevo',
+        context: 'Prvé hviezdy klesajú. Potrebuješ drevo na oheň a úkryt. Máš 3/4 zásob, no potrebuješ 5/6. Koľko ti chýba?',
+        inputs: ['number'],
+        question: '5/6 − 3/4 = ?',
+        answer: 1/12,
+        time: 120,
+        transition: () => playSuccess()
       },
       {
-        title: "Úloha 2: Telocvičňa",
-        context: "V šatni je 94 tričiek. Potrebuješ ich rozdeliť do tašiek po 7 kusoch. Zaujíma nás, koľko celých tašiek môžeš pripraviť.",
-        question: "Koľko tašiek môžeš pripraviť, ak každá má 7 tričiek?",
-        answer: "13"
+        background: 'assets/house.gif',
+        title: 'Úloha 2: Stavba úkrytu',
+        context: 'Staviaš obdĺžnikový úkryt so stranami 8 a 5 blokov. Vypočítaj obvod a obsah.',
+        inputs: ['number','number'],
+        question: 'Obvod = ?, Obsah = ?',
+        answer: [26,40],
+        time: 180,
+        transition: () => playSuccess()
       },
       {
-        title: "Úloha 3: Galéria obrázkov",
-        context: "Máš 107 plagátov a chceš ich nalepiť na panely, pričom na každom bude 9 plagátov. Koľko panelov potrebuješ? (zvyšné nezarátaj)",
-        question: "Koľko celých panelov potrebuješ?",
-        answer: "11"
+        background: 'assets/diamond_cave.gif',
+        title: 'Minihra: Nájdite diamanty',
+        context: 'Klikni na diamantový blok presne 5-krát, než vyprší čas!',
+        type: 'click',
+        clicksRequired: 5,
+        time: 60,
+        transition: () => playSuccess()
       },
       {
-        title: "Úloha 4: Výtvarný sklad",
-        context: "V sklade sa nachádza 63 vedier farby. Ak ich chceš rozdeliť rovnomerne medzi 5 tried, koľko vedier dostane každá trieda?",
-        question: "Rozdel 63 vedier medzi 5 tried rovnomerne (zvyšok ignoruj)",
-        answer: "12"
+        background: 'assets/furnace.gif',
+        title: 'Úloha 3: Pečenie chleba',
+        context: 'Každý chlieb potrebuje 3/8 múky. Máš 5 vrecúšok. Koľko chleba upiecť môžeš?',
+        inputs: ['number'],
+        question: '5 ÷ (3/8) = ?',
+        answer: 13,
+        time: 120,
+        transition: () => playSuccess()
       },
       {
-        title: "Úloha 5: Tlačiareň",
-        context: "Tlačiareň má 286 strán pripravených na tlač. Každý balík má 12 strán. Koľko celých balíkov je možné vytvoriť?",
-        question: "Koľko celých balíkov môžeme vytvoriť z 286 strán po 12 na balík?",
-        answer: "23"
+        background: 'assets/mining.gif',
+        title: 'Úloha 4: Ťažba železa',
+        context: 'Štvorcový lom so stranou 12 blokov. Vyťažili ste 5/8 rudy. Koľko zostalo?',
+        inputs: ['number'],
+        question: '12² × (3/8) = ?',
+        answer: 54,
+        time: 150,
+        transition: () => playSuccess()
       },
       {
-        title: "Úloha 6: Tajný výstup",
-        context: "Získané čísla zo všetkých predchádzajúcich úloh sčítaj. Výsledok del číslom 10. Koľko dostaneš?",
-        question: "(15 + 13 + 11 + 12 + 23) / 10 = ?",
-        answer: "7"
+        background: 'assets/portal.gif',
+        title: 'Úloha 5: Portál domov',
+        context: 'Na aktiváciu potrebuješ 2/3 z 18 ender perál. Koľko ich použiješ?',
+        inputs: ['number'],
+        question: '2/3 × 18 = ?',
+        answer: 12,
+        time: 120,
+        transition: () => playSuccess()
       }
     ];
 
-    let currentTask = 0;
-    let timer;
-    let timeLeft = 90;
+    let current = -1, timer, clicks = 0, muted = false;
+    const music = document.getElementById('bg-music');
 
-    function startGame() {
-      document.getElementById('intro').classList.add('hidden');
-      document.getElementById('task-container').classList.remove('hidden');
-      loadTask();
-      startTimer();
+    function toggleMute(){
+      muted = !muted;
+      music.muted = muted;
+      document.querySelector('.mute-btn').textContent = muted ? '🔇' : '🔊';
     }
 
-    function loadTask() {
-      const task = tasks[currentTask];
-      document.getElementById('task-title').textContent = task.title;
-      document.getElementById('task-context').textContent = task.context;
-      document.getElementById('task-question').textContent = task.question;
-      document.getElementById('task-answer').value = "";
-      document.getElementById('feedback').textContent = "";
-      document.getElementById('task-answer').disabled = false;
-      timeLeft = 90;
+    function startAdventure(){
+      nextTask();
     }
 
-    function checkAnswer() {
-      const userAnswer = document.getElementById('task-answer').value.trim();
-      if (userAnswer === tasks[currentTask].answer) {
-        clearInterval(timer);
-        document.getElementById('feedback').textContent = "✔️ Správne! Prechádzate do ďalšej miestnosti...";
-        document.getElementById('feedback').style.color = "#00ffcc";
-        setTimeout(() => {
-          currentTask++;
-          if (currentTask < tasks.length) {
-            loadTask();
-            startTimer();
-          } else {
-            document.getElementById('task-container').innerHTML = '<h2>🎉 Úspešne ste unikli! 🎉</h2><p>Vaše logické schopnosti vás oslobodili zo zapečatených miestností.</p>';
-          }
-        }, 2000);
+    function nextTask(){
+      current++;
+      clicks = 0;
+      if(current >= tasks.length){
+        showEnd(); return;
+      }
+      loadTask(tasks[current]);
+    }
+
+    function loadTask(t){
+      document.body.style.backgroundImage = `url('${t.background}')`;
+      const tc = document.getElementById('task-container');
+      tc.classList.remove('hidden');
+      tc.innerHTML = '';
+      let html = `<h2>${t.title}</h2>
+        <p>${t.context}</p>
+        <p><strong>Otázka:</strong> ${t.question}</p>`;
+      if(t.type === 'click'){
+        html += `<div id="mini-game">
+          <div class="click-block" onclick="handleClick()"></div>
+          <p>0 / ${t.clicksRequired}</p>
+        </div>`;
       } else {
-        document.getElementById('feedback').textContent = "❌ Nesprávne, skús znova.";
-        document.getElementById('feedback').style.color = "#ff6666";
+        html += `<div id="inputs">`;
+        t.inputs.forEach((_,i) => {
+          html += `<input type="text" id="ans${i}" placeholder="Odpoveď">`;
+        });
+        html += `</div>
+          <button class="next-btn" onclick="checkAnswer()">Skontrolovať</button>`;
+      }
+      html += `<div id="feedback"></div><div id="timer"></div>`;
+      tc.innerHTML = html;
+      startTimer(t.time);
+    }
+
+    function handleClick(){
+      clicks++;
+      document.querySelector('#mini-game p').textContent = `${clicks} / ${tasks[current].clicksRequired}`;
+      if(clicks >= tasks[current].clicksRequired){
+        clearInterval(timer);
+        playSuccess();
+        setTimeout(nextTask, 1000);
       }
     }
 
-    function startTimer() {
+    function checkAnswer(){
+      const t = tasks[current];
+      let ok = true;
+      t.inputs.forEach((_,i) => {
+        const val = parseFloat(document.getElementById(`ans${i}`).value);
+        const ans = Array.isArray(t.answer) ? t.answer[i] : t.answer;
+        if(Math.abs(val - ans) > 0.01) ok = false;
+      });
+      if(ok){
+        clearInterval(timer);
+        playSuccess();
+        setTimeout(nextTask, 1000);
+      } else {
+        document.getElementById('feedback').textContent = '❌ Skús znova';
+      }
+    }
+
+    function startTimer(sec){
       clearInterval(timer);
-      document.getElementById("timer").textContent = `⏱️ Zostávajúci čas: ${timeLeft} sekúnd`;
+      let s = sec;
+      document.getElementById('timer').textContent = `⏱️ ${s}s`;
       timer = setInterval(() => {
-        timeLeft--;
-        document.getElementById("timer").textContent = `⏱️ Zostávajúci čas: ${timeLeft} sekúnd`;
-        if (timeLeft <= 0) {
+        s--;
+        document.getElementById('timer').textContent = `⏱️ ${s}s`;
+        if(s <= 0){
           clearInterval(timer);
-          document.getElementById('feedback').textContent = "⛔ Čas vypršal. Skús to znova neskôr.";
-          document.getElementById('feedback').style.color = "#ff0000";
-          document.getElementById('task-answer').disabled = true;
+          document.getElementById('feedback').textContent = '⛔ Čas vypršal';
         }
       }, 1000);
+    }
+
+    function playSuccess(){
+      document.getElementById('success-sound').play();
+      // tu môžeš pridať animáciu portálu alebo level-up
+    }
+
+    function showEnd(){
+      document.body.style.backgroundImage = "url('assets/celebration.gif')";
+      document.getElementById('task-container').innerHTML = 
+        `<h2>🎉 Úspešne ste unikli! 🎉</h2>
+         <p>Vitaj späť v škole.</p>`;
     }
   </script>
 </body>
