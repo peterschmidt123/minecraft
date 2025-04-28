@@ -1,66 +1,287 @@
-const tasks = [
-  {
-    background: 'assets/forest.gif',
-    title: 'Úloha 1: Steny tvrze',
-    context: 'Postavili ste hrad so stranami 4 a 6 blokov. Vypočítajte obvod a potom z tohto počtu vyberte 3/5 na prednú stenu.',
-    inputs: ['text','text'],
-    answer: [20, 12],
-    time: 150
-  },
-  {
-    background: 'assets/house.gif',
-    title: 'Úloha 2: Diamantové turnaje',
-    context: 'V bani máte 12 diamantov. Za prvú hodinu získate 2/6 z celku, za druhú 1/6. Spočítajte, koľko diamantov máte spolu a aký je priemerný zisk za hodinu.',
-    inputs: ['text','text'],
-    answer: [6, 3],
-    time: 180
-  },
-  {
-    background: 'assets/mining.gif',
-    title: 'Úloha 3: Nočná lúka',
-    context: 'Máte lúku 8 × 5 blokov. V noci opustí lúku 3/8 plochy. Vypočítajte celkovú plochu a plochu, ktorá zostala.',
-    inputs: ['text','text'],
-    answer: [40, 25],
-    time: 150
-  },
-  {
-    background: 'assets/furnace.gif',
-    title: 'Úloha 4: Drevené dosky',
-    context: 'Máte 20 kmeňov. Polovicu spracujete na dosky, pričom z každého kmeňa dostanete 4 dosky. Koľko dosiek získate?',
-    inputs: ['text'],
-    answer: [40],
-    time: 120
-  },
-  {
-    background: 'assets/portal.gif',
-    title: 'Úloha 5: Semená úspechu',
-    context: 'Pole má rozmery 12 × 8 blokov. Zasiať musíte 1/4 jeho plochy. Koľko blokov bude obsadených semienkami?',
-    inputs: ['text'],
-    answer: [24],
-    time: 120
-  },
-  {
-    background: 'assets/forest.gif',
-    title: 'Úloha 6: Pločinky z jabĺk',
-    context: 'Na jednu placku potrebujete 3/4 hrnca jabĺk a 1/4 hrnca múky. Pripravujete dve placky. Koľko hrncov jabĺk a múky spotrebujete?',
-    inputs: ['text','text'],
-    answer: [1.5, 0.5],
-    time: 150
-  },
-  {
-    background: 'assets/diamond_cave.gif',
-    title: 'Úloha 7: Redstone brány',
-    context: 'Prvá brána potrebuje 1/3 jednotky redstone, druhá potrebuje 2/3 jednotky. Koľko jednotiek redstone potrebujete spolu?',
-    inputs: ['text'],
-    answer: [1],
-    time: 90
-  },
-  {
-    background: 'assets/portal.gif',
-    title: 'Úloha 8: Finálna energia',
-    context: 'Portál vyžaduje fragmenty energie: 1/5, 2/5 a 2/5 jednotky. Spočítajte ich súčet.',
-    inputs: ['text'],
-    answer: [1],
-    time: 120
-  }
-];
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Escape Room: Minecraft Zlomky</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #f2f2f2;
+      background-image: url('assets/minecraft.jpg');
+      background-size: cover;
+      background-position: center;
+      transition: background-image 1s ease-in-out;
+      position: relative;
+    }
+    .overlay {
+      background-color: rgba(0,0,0,0.6);
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; z-index: 0;
+    }
+    .container {
+      position: relative; z-index: 1;
+      max-width: 800px; margin: 3rem auto;
+      padding: 2rem; background: rgba(44,62,80,0.85);
+      border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.7);
+      animation: fadeIn 1s;
+      color: #f2f2f2;
+    }
+    h1, h2 { color: #00ccff; margin-bottom: 1rem; }
+    p, pre { margin-bottom: 1rem; line-height: 1.5; white-space: pre-wrap; }
+    input[type=text] {
+      padding: 0.6rem; width: calc(50% - 1rem);
+      margin-right: 1rem; border: 1px solid #ccc;
+      border-radius: 6px; font-size: 1rem;
+    }
+    .start-btn, .next-btn, .mute-btn {
+      background: #00ccff; color: #1a1a1a;
+      padding: 0.6rem 1.2rem; border: none;
+      border-radius: 6px; cursor: pointer;
+      margin-top: 1rem; transition: transform 0.2s;
+      font-size: 1rem;
+    }
+    .start-btn:hover, .next-btn:hover, .mute-btn:hover { transform: scale(1.05); }
+    .mute-btn {
+      position: fixed; top: 10px; right: 10px; z-index: 2;
+    }
+    #timer { margin-top: 1rem; font-weight: bold; }
+    .click-block {
+      width: 100px; height: 100px;
+      background: url('assets/diamond_block.png') no-repeat center;
+      background-size: contain; margin: 1rem auto;
+      cursor: pointer;
+    }
+    .hidden { display: none; }
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <audio id="bg-music" src="music/ambient.mp3" loop></audio>
+  <audio id="success-sound" src="music/success.mp3"></audio>
+  <button class="mute-btn" onclick="toggleMute()">🔊</button>
+
+  <div class="container" id="intro">
+    <h1>Prológ: Vtiahnutie do sveta Minecraft</h1>
+    <p>
+      V škole ste náhodou objavili ukrytý portál, ktorý vás preniesol do neznámeho kúta Minecraftu.
+      Okolo vás sa rozprestiera divoký les, nad vami sa blýska tmavá obloha a čoskoro príde noc.
+      Vašou jedinou šancou na návrat je postupne plniť matematické úlohy, ktoré aktivujú magické kamene
+      v okolí a nakoniec otvoria portál domov.
+    </p>
+    <button class="start-btn" onclick="startAdventure()">Začať dobrodružstvo</button>
+  </div>
+
+  <div class="container hidden" id="task-container"></div>
+
+  <script>
+    const tasks = [
+      {
+        background: 'assets/forest.gif',
+        title: 'Úloha 1: Stavba tvrze',
+        context:
+`Miesto: Čerstvo vyrúbaná lúka pri okraji lesa
+Lesníci vám pripravili plány hradu so stranami 4 a 6 blokov.
+Prvým krokom je vypočítať obvod tvrze.
+Následne z tohto počtu použite tri pätiny na vysokú prednú hradbu, ktorá vás ochráni pred mobmi.`,
+        inputs: ['text','text'],
+        answer: [20, 12],
+        time: 150
+      },
+      {
+        background: 'assets/house.gif',
+        title: 'Úloha 2: Diamantové turnaje',
+        context:
+`Miesto: Vchod do starej bane, hlboko pod tvrďou
+Keď hradba stojí, nájdete v bani 12 diamantov.
+Za prvú hodinu získate dve šestiny z celku, za druhú jednu šestinu.
+Spočítajte, koľko diamantov máte spolu a aký je váš priemerný zisk za hodinu.`,
+        inputs: ['text','text'],
+        answer: [6, 3],
+        time: 180
+      },
+      {
+        background: 'assets/mining.gif',
+        title: 'Úloha 3: Nočná lúka',
+        context:
+`Miesto: Vyľakaná lúka pred baníckou šachtou
+Máte lúku 8 × 5 blokov.
+V noci ju opustia hordy netopierov o tri osminy plochy.
+Vypočítajte celkovú plochu a plochu, ktorá zostala.`,
+        inputs: ['text','text'],
+        answer: [40, 25],
+        time: 150
+      },
+      {
+        background: 'assets/furnace.gif',
+        title: 'Úloha 4: Drevené dosky',
+        context:
+`Miesto: Stará dielňa s pecami
+V dielni nájdete 20 kmeňov dreva.
+Spracujte polovicu kmeňov, pričom z každého získate 4 dosky.
+Koľko dosiek máte celkom?`,
+        inputs: ['text'],
+        answer: [40],
+        time: 120
+      },
+      {
+        background: 'assets/portal.gif',
+        title: 'Úloha 5: Semená úspechu',
+        context:
+`Miesto: Skrytá farmička za dielňou
+Pole je obdĺžnik 12 × 8 blokov.
+Potrebujete zasiať semienka na jednu štvrtinu plochy.
+Koľko blokov bude obsadených semienkami?`,
+        inputs: ['text'],
+        answer: [24],
+        time: 120
+      },
+      {
+        background: 'assets/forest.gif',
+        title: 'Úloha 6: Pločinky z jabĺk',
+        context:
+`Miesto: Kuchyňa farmy, kde visia košíky jabĺk
+Na jednu placku potrebujete tri štvrtiny hrnca jabĺk a jednu štvrtinu múky.
+Pripravujete dve placky.
+Koľko hrncov jabĺk a múky spotrebujete?`,
+        inputs: ['text','text'],
+        answer: [1.5, 0.5],
+        time: 150
+      },
+      {
+        background: 'assets/diamond_cave.gif',
+        title: 'Úloha 7: Redstone brány',
+        context:
+`Miesto: Vežička so zložitým redstone zapojením
+Prvá brána potrebuje jednu tretinu jednotky redstone,
+druhá dve tretiny jednotky.
+Koľko jednotiek redstone potrebujete spolu?`,
+        inputs: ['text'],
+        answer: [1],
+        time: 90
+      },
+      {
+        background: 'assets/portal.gif',
+        title: 'Úloha 8: Finálna energia',
+        context:
+`Miesto: Spodný sál s portálom domov
+Portál vyžaduje fragmenty energie: jednu pätinu,
+dve pätiny a dve pätiny jednotky.
+Spočítajte ich súčet, aktivujte kamene a vráťte sa domov!`,
+        inputs: ['text'],
+        answer: [1],
+        time: 120
+      }
+    ];
+
+    let current = -1, timer, muted = false;
+    const intro = document.getElementById('intro'),
+          taskContainer = document.getElementById('task-container'),
+          bgMusic = document.getElementById('bg-music'),
+          successSound = document.getElementById('success-sound'),
+          muteBtn = document.querySelector('.mute-btn');
+
+    function toggleMute() {
+      muted = !muted;
+      bgMusic.muted = muted;
+      successSound.muted = muted;
+      muteBtn.textContent = muted ? '🔇' : '🔊';
+    }
+
+    function startAdventure() {
+      intro.classList.add('hidden');
+      bgMusic.play();
+      nextTask();
+    }
+
+    function nextTask() {
+      current++;
+      if (current >= tasks.length) return finishAdventure();
+      showPortal();
+    }
+
+    function showPortal() {
+      taskContainer.classList.add('hidden');
+      document.body.style.backgroundImage = "url('assets/portal.gif')";
+      setTimeout(loadTask, 1500);
+    }
+
+    function loadTask() {
+      const t = tasks[current];
+      document.body.style.backgroundImage = `url('${t.background}')`;
+      taskContainer.classList.remove('hidden');
+      taskContainer.innerHTML = `
+        <h2>${t.title}</h2>
+        <pre>${t.context}</pre>
+        <div id="inputs">
+          ${t.inputs.map((_,i) =>
+            `<input type="text" id="ans${i}" placeholder="Odpoveď">`
+          ).join('')}
+        </div>
+        <button class="next-btn" onclick="checkAnswer()">Skontrolovať</button>
+        <div id="feedback"></div>
+        <div id="timer"></div>
+      `;
+      startTimer(tasks[current].time);
+    }
+
+    function checkAnswer() {
+      const t = tasks[current];
+      let ok = true;
+      t.inputs.forEach((_,i) => {
+        const val = parseFloat(parseFraction(document.getElementById(`ans${i}`).value.trim()));
+        const ans = Array.isArray(t.answer) ? t.answer[i] : t.answer;
+        if (Math.abs(val - ans) > 0.01) ok = false;
+      });
+      if (ok) celebrateAndContinue();
+      else document.getElementById('feedback').textContent = '❌ Skús znova';
+    }
+
+    function celebrateAndContinue() {
+      clearInterval(timer);
+      bgMusic.pause();
+      successSound.currentTime = 0;
+      successSound.play();
+      successSound.onended = () => {
+        if (!muted) bgMusic.play();
+        nextTask();
+      };
+    }
+
+    function startTimer(sec) {
+      clearInterval(timer);
+      let s = sec;
+      document.getElementById('timer').textContent = `⏱️ ${s}s`;
+      timer = setInterval(() => {
+        s--;
+        document.getElementById('timer').textContent = `⏱️ ${s}s`;
+        if (s <= 0) {
+          clearInterval(timer);
+          document.getElementById('feedback').textContent = '⛔ Čas vypršal';
+        }
+      }, 1000);
+    }
+
+    function parseFraction(s) {
+      if (s.includes('/')) {
+        const [n,d] = s.split('/').map(Number);
+        return n/d;
+      }
+      return s === '' ? 0 : parseFloat(s);
+    }
+
+    function finishAdventure() {
+      taskContainer.classList.add('hidden');
+      document.body.style.backgroundImage = "url('assets/celebration.gif')";
+      taskContainer.innerHTML = `
+        <h2>🎉 Portál je aktivovaný! 🎉</h2>
+        <p>Gratulujeme, vaša matematická šikovnosť vás zachránila.</p>`;
+      taskContainer.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
