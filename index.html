@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Escape Room: Minecraft Zlomky</title>
+  <title>Escape Room: Minecraft Dobrodružstvo - Zlomky 4. ročník</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Segoe UI',Tahoma,sans-serif;color:#fff;background-size:cover;background-position:center;transition:background-image 1s ease;position:relative;}
@@ -21,45 +21,157 @@
 </head>
 <body>
   <div class="overlay"></div>
-  <audio id="music" src="music/ambient.mp3" loop autoplay></audio>
+  <audio id="music" src="music/ambient.mp3" loop></audio>
   <audio id="win" src="music/success.mp3"></audio>
-  <button class="mute" onclick="mute()">🔊</button>
+  <button class="mute" onclick="toggleMute()">🔊</button>
+
   <div class="container" id="intro">
-    <h1>Escape Room: Minecraft Zlomky</h1>
+    <h1>Escape Room: Minecraft Dobrodružstvo</h1>
     <p>Ocitli ste sa magicky prenesení do sveta Minecraft. Noc sa blíži a vy potrebujete prežiť: získať drevo, postaviť úkryt, upiecť jedlo, ťažiť suroviny a aktívovať portál domov!</p>
-    <button class="btn" onclick="next()">Začať dobrodružstvo</button>
+    <button class="btn" onclick="startAdventure()">Začať dobrodružstvo</button>
   </div>
 
-  <div class="container hidden" id="task"></nobr>
-  </div>
+  <div class="container hidden" id="task"></div>
 
   <script>
-    const tasks=[
-      {bg:'assets/forest.gif',title:'Úloha 1: Zlomky dreva',context:'Potrebujete oheň a úkryt. Máte 3/4 zásob dreva, potrebujete 5/6. Koľko vám chýba?','inputs':1,question:'5/6 − 3/4 = ?',answer:1/12,time:90},
-      {bg:'assets/house.gif',title:'Úloha 2: Stavba úkrytu',context:'Úkryt má tvar obdĺžnika 8×5 blokov. Vypočítaj obvod a obsah.',inputs:2,question:'Obvod = ? , Obsah = ?',answer:[26,40],time:120},
-      {bg:'assets/diamond_cave.gif',type:'click',title:'Minihra',context:'Klikni na diamantový blok 5-krát',clicks:5,time:60},
-      {bg:'assets/furnace.gif',title:'Úloha 3: Pečenie chleba',context:'Chlieb spotrebuje 3/8 múky, máte 5 vrecúšok. Koľko chleba upiecť môžete?',inputs:1,question:'5 ÷ (3/8) = ?',answer:13,time:90},
-      {bg:'assets/mining.gif',title:'Úloha 4: Ťažba rudy',context:'Lom 12×12 blokov, vyťažili ste 5/8 rudy. Koľko zostalo?',inputs:1,question:'144×(3/8) = ?',answer:54,time:90},
-      {bg:'assets/portal.gif',title:'Úloha 5: Portál domov',context:'Potrebujete 2/3 z 18 ender perál.',inputs:1,question:'2/3×18 = ?',answer:12,time:90}
-    ];
-    let i=-1,tm,score=0,clicks=0,muted=false;
-    const cont=document.getElementById('task'),intro=document.getElementById('intro');
-    function mute(){muted=!muted;document.getElementById('music').muted=muted;document.querySelector('.mute').textContent=muted?'🔇':'🔊';}
-    function next(){i++;if(i===tasks.length){end();return;}render(tasks[i]);}
-    function render(t){document.body.style.backgroundImage=`url(${t.bg})`;cont.classList.remove('hidden');intro.classList.add('hidden');
-      let html=`<h2>${t.title}</h2><p>${t.context}</p>`;
-      if(t.type==='click'){html+=`<div id="mini-game"><div class="click-block" onclick="clk()"></div><p>0 / ${t.clicks}</p></div>`;
-      }else{html+=`<p><strong>Otázka:</strong> ${t.question}</p><div>`;
-        for(let k=0;k<t.inputs;k++) html+=`<input type="text" id="a${k}" placeholder="odpoveď">`;
-        html+=`</div><button class="btn" onclick="chk()">Skontrolovať</button>`;
+    // Parser zlomkov a čísel
+    function parseAns(str){
+      if(str.includes('/')){
+        const [n,d] = str.split('/').map(Number);
+        return n/d;
       }
-      html+=`<div id="feedback"></div><div id="timer"></div>`;cont.innerHTML=html;startTimer(t.time);
+      return parseFloat(str);
     }
-    function clk(){clicks++;document.querySelector('#mini-game p').textContent=`${clicks} / ${tasks[i].clicks}`;if(clicks>=tasks[i].clicks){winIt();}}
-    function chk(){const t=tasks[i];let ok=true;if(!t.type){for(let k=0;k<t.inputs;k++){const v=parseFloat(document.getElementById('a'+k).value);const ans=Array.isArray(t.answer)?t.answer[k]:t.answer; if(Math.abs(v-ans)>0.01)ok=false;}}if(ok)winIt();else document.getElementById('feedback').textContent='❌ Skús znova';}
-    function startTimer(s){clearInterval(tm);let c=s;document.getElementById('timer').textContent=`⏱️ ${c}s`;tm=setInterval(()=>{c--;document.getElementById('timer').textContent=`⏱️ ${c}s`;if(c<=0){clearInterval(tm);document.getElementById('feedback').textContent='⛔ Čas vypršal';}},1000);}
-    function winIt(){clearInterval(tm);document.getElementById('feedback').textContent='✔️ Správne!';document.getElementById('win').play();setTimeout(next,1000);}
-    function end(){document.body.style.backgroundImage="url('assets/celebration.gif')";cont.innerHTML=`<h2>🎉 Úspešne ste unikli! 🎉</h2><p>Vitajte späť v škole.</p>`;}
+
+    const tasks = [
+      {
+        bg: 'assets/forest.gif',
+        title: 'Úloha 1: Zlomky s rovnakým menovateľom (sčítanie)',
+        context: 'Na strome sú 5/8 jahôd a na zemi 2/8 jahôd. Koľko jahôd máte spolu?',
+        inputs: 1,
+        question: '5/8 + 2/8 = ?',
+        answer: 7/8,
+        time: 90
+      },
+      {
+        bg: 'assets/house.gif',
+        title: 'Úloha 2: Fakle svetla (logická hádanka)',
+        context: 'Máte dve fakle: jedna horí 5/8 sekundy, druhá 3/8 sekundy. Keď ich spojené plamene horia spolu, nový plameň horí dobu rovnakú ako súčet oboch. Koľko sekúnd horí ten nový plameň?',
+        inputs: 1,
+        question: '5/8 + 3/8 = ?',
+        answer: 1,
+        time: 90
+      },
+      {
+        bg: 'assets/diamond_cave.gif',
+        type: 'click',
+        title: 'Minihra: Diamanty',
+        context: 'Kliknite na diamantový blok presne 5-krát, aby ste našli diamanty na craftovanie!',
+        clicks: 5,
+        time: 60
+      },
+      {
+        bg: 'assets/furnace.gif',
+        title: 'Úloha 3: Geometria a zlomky (obsah)',
+        context: 'Máte oblasť 6 × 4 bloky. Použijete 3/4 tejto oblasti na ovocný sad. Koľko blokov sad zaberá?',
+        inputs: 1,
+        question: '(6 × 4) × (3/4) = ?',
+        answer: 18,
+        time: 120
+      },
+      {
+        bg: 'assets/mining.gif',
+        title: 'Úloha 4: Delenie celých čísel',
+        context: 'Máte 20 železných ingotov a rozdelíte ich medzi 4 železiarov. Koľko ingotov dostane každý?',
+        inputs: 1,
+        question: '20 ÷ 4 = ?',
+        answer: 5,
+        time: 90
+      },
+      {
+        bg: 'assets/portal.gif',
+        title: 'Úloha 5: Komplexná hádanka',
+        context: 'Na aktiváciu portálu potrebujete spočítať zlomky a celé čísla: najprv sčítajte 1/2 + 1/4, výsledok vynásobte 4, a potom k nemu pripočítajte (20 ÷ 5). Koľko máte celkom?',
+        inputs: 1,
+        question: '(1/2 + 1/4) × 4 + (20 ÷ 5) = ?',
+        answer: 5,
+        time: 150
+      }
+    ];
+
+    let idx = -1, timer, clicks = 0, muted = false;
+    const container = document.getElementById('task');
+    const intro = document.getElementById('intro');
+    const music = document.getElementById('music');
+
+    function toggleMute(){
+      muted = !muted;
+      music.muted = muted;
+      document.querySelector('.mute').textContent = muted ? '🔇' : '🔊';
+    }
+
+    function startAdventure(){
+      music.play().catch(()=>{});
+      next();
+    }
+
+    function next(){
+      idx++;
+      clicks = 0;
+      if(idx >= tasks.length){ end(); return; }
+      render(tasks[idx]);
+    }
+
+    function render(t){
+      document.body.style.backgroundImage = `url(${t.bg})`;
+      container.classList.remove('hidden');
+      intro.classList.add('hidden');
+      let html = `<h2>${t.title}</h2><p>${t.context}</p>`;
+      if(t.type === 'click'){
+        html += `<div id='mini-game'><div class='click-block' onclick='handleClick()'></div><p>0 / ${t.clicks}</p></div>`;
+      } else {
+        html += `<p><strong>Otázka:</strong> ${t.question}</p><div>`;
+        for(let i=0;i<t.inputs;i++) html+=`<input type='text' id='a${i}' placeholder='odpoveď'>`;
+        html += `</div><button class='btn' onclick='checkAnswer()'>Skontrolovať</button>`;
+      }
+      html += `<div id='feedback'></div><div id='timer'></div>`;
+      container.innerHTML = html;
+      startTimer(t.time);
+    }
+
+    function handleClick(){
+      clicks++;
+      document.querySelector('#mini-game p').textContent = `${clicks} / ${tasks[idx].clicks}`;
+      if(clicks>=tasks[idx].clicks) win();
+    }
+
+    function checkAnswer(){
+      const t = tasks[idx]; let ok=true;
+      for(let i=0;i<t.inputs;i++){
+        const v=parseAns(document.getElementById('a'+i).value);
+        if(Math.abs(v - t.answer) > 0.01) ok=false;
+      }
+      if(ok) win(); else document.getElementById('feedback').textContent='❌ Skús znova';
+    }
+
+    function startTimer(sec){
+      clearInterval(timer);
+      let s=sec;
+      document.getElementById('timer').textContent=`⏱️ ${s}s`;
+      timer=setInterval(()=>{s--;document.getElementById('timer').textContent=`⏱️ ${s}s`;if(s<=0){clearInterval(timer);document.getElementById('feedback').textContent='⛔ Čas vypršal';}},1000);
+    }
+
+    function win(){
+      clearInterval(timer);
+      document.getElementById('feedback').textContent='✔️ Správne!';
+      document.getElementById('win').play();
+      setTimeout(next,1000);
+    }
+
+    function end(){
+      document.body.style.backgroundImage="url('assets/celebration.gif')";
+      container.innerHTML=`<h2>🎉 Úspešne ste unikli! 🎉</h2><p>Vitajte späť v škole.</p>`;
+    }
   </script>
 </body>
 </html>
