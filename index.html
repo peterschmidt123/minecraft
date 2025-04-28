@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escape Room: Rozdelené tajomstvo</title>
+  <style>
+    body {
+      background-color: #1a1a1a;
+      color: #f2f2f2;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+      background-color: #2c3e50;
+      border-radius: 12px;
+      margin-top: 3rem;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+    }
+    h1, h2 {
+      color: #00ccff;
+    }
+    p {
+      line-height: 1.6;
+    }
+    .start-btn, .next-btn {
+      background-color: #00ccff;
+      color: #1a1a1a;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 1rem;
+      font-size: 1rem;
+      transition: transform 0.2s;
+    }
+    .start-btn:hover, .next-btn:hover {
+      transform: scale(1.05);
+    }
+    .hidden {
+      display: none;
+    }
+    .task-section {
+      margin-top: 2rem;
+    }
+    .background {
+      animation: unlock 2s ease-in-out;
+    }
+    @keyframes unlock {
+      from {opacity: 0; transform: scale(0.95);}
+      to {opacity: 1; transform: scale(1);}
+    }
+    input[type="text"] {
+      padding: 0.6rem;
+      width: 200px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+    #timer {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="intro">
+    <h1>Escape Room: Rozdelené tajomstvo</h1>
+    <p>
+      V škole sa koná tajomná súťaž pre najbystrejších žiakov 5. ročníka. Boli ste zamknutí do starej časti budovy, kde sa nachádza sedem zapečatených miestností. Každá skrýva jednu matematickú úlohu. Ak ju vyriešite, miestnosť sa odomkne, prebliknú svetlá a dvere sa pootvoria – pripravené na váš ďalší krok.
+    </p>
+    <p>
+      Ste pripravení otestovať svoju logiku a prebojovať sa na slobodu pomocou svojich matematických schopností?
+    </p>
+    <button class="start-btn" onclick="startGame()">Začať úlohy</button>
+  </div>
+
+  <div class="container hidden task-section background" id="task-container">
+    <h2 id="task-title"></h2>
+    <p id="task-context"></p>
+    <p><strong>Otázka:</strong> <span id="task-question"></span></p>
+    <input type="text" id="task-answer" placeholder="Tvoja odpoveď">
+    <button class="next-btn" onclick="checkAnswer()">Skontrolovať</button>
+    <div id="feedback"></div>
+    <div id="timer"></div>
+  </div>
+
+  <script>
+    const tasks = [
+      {
+        title: "Úloha 1: Školská knižnica",
+        context: "Na starých policiach je 125 kníh. Chceš ich rozdeliť do políc, pričom na každej bude rovnaký počet. Koľko kníh bude na jednej polici, ak ich rozdelíš do 8 políc? (so zvyškom)",
+        question: "Koľko kníh bude na jednej polici, ak ich rozdelíš do 8 políc? (Zvyšok ignoruj)",
+        answer: "15"
+      },
+      {
+        title: "Úloha 2: Telocvičňa",
+        context: "V šatni je 94 tričiek. Potrebuješ ich rozdeliť do tašiek po 7 kusoch. Zaujíma nás, koľko celých tašiek môžeš pripraviť.",
+        question: "Koľko tašiek môžeš pripraviť, ak každá má 7 tričiek?",
+        answer: "13"
+      },
+      {
+        title: "Úloha 3: Galéria obrázkov",
+        context: "Máš 107 plagátov a chceš ich nalepiť na panely, pričom na každom bude 9 plagátov. Koľko panelov potrebuješ? (zvyšné nezarátaj)",
+        question: "Koľko celých panelov potrebuješ?",
+        answer: "11"
+      },
+      {
+        title: "Úloha 4: Výtvarný sklad",
+        context: "V sklade sa nachádza 63 vedier farby. Ak ich chceš rozdeliť rovnomerne medzi 5 tried, koľko vedier dostane každá trieda?",
+        question: "Rozdel 63 vedier medzi 5 tried rovnomerne (zvyšok ignoruj)",
+        answer: "12"
+      },
+      {
+        title: "Úloha 5: Tlačiareň",
+        context: "Tlačiareň má 286 strán pripravených na tlač. Každý balík má 12 strán. Koľko celých balíkov je možné vytvoriť?",
+        question: "Koľko celých balíkov môžeme vytvoriť z 286 strán po 12 na balík?",
+        answer: "23"
+      },
+      {
+        title: "Úloha 6: Tajný výstup",
+        context: "Získané čísla zo všetkých predchádzajúcich úloh sčítaj. Výsledok del číslom 10. Koľko dostaneš?",
+        question: "(15 + 13 + 11 + 12 + 23) / 10 = ?",
+        answer: "7"
+      }
+    ];
+
+    let currentTask = 0;
+    let timer;
+    let timeLeft = 90;
+
+    function startGame() {
+      document.getElementById('intro').classList.add('hidden');
+      document.getElementById('task-container').classList.remove('hidden');
+      loadTask();
+      startTimer();
+    }
+
+    function loadTask() {
+      const task = tasks[currentTask];
+      document.getElementById('task-title').textContent = task.title;
+      document.getElementById('task-context').textContent = task.context;
+      document.getElementById('task-question').textContent = task.question;
+      document.getElementById('task-answer').value = "";
+      document.getElementById('feedback').textContent = "";
+      document.getElementById('task-answer').disabled = false;
+      timeLeft = 90;
+    }
+
+    function checkAnswer() {
+      const userAnswer = document.getElementById('task-answer').value.trim();
+      if (userAnswer === tasks[currentTask].answer) {
+        clearInterval(timer);
+        document.getElementById('feedback').textContent = "✔️ Správne! Prechádzate do ďalšej miestnosti...";
+        document.getElementById('feedback').style.color = "#00ffcc";
+        setTimeout(() => {
+          currentTask++;
+          if (currentTask < tasks.length) {
+            loadTask();
+            startTimer();
+          } else {
+            document.getElementById('task-container').innerHTML = '<h2>🎉 Úspešne ste unikli! 🎉</h2><p>Vaše logické schopnosti vás oslobodili zo zapečatených miestností.</p>';
+          }
+        }, 2000);
+      } else {
+        document.getElementById('feedback').textContent = "❌ Nesprávne, skús znova.";
+        document.getElementById('feedback').style.color = "#ff6666";
+      }
+    }
+
+    function startTimer() {
+      clearInterval(timer);
+      document.getElementById("timer").textContent = `⏱️ Zostávajúci čas: ${timeLeft} sekúnd`;
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").textContent = `⏱️ Zostávajúci čas: ${timeLeft} sekúnd`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          document.getElementById('feedback').textContent = "⛔ Čas vypršal. Skús to znova neskôr.";
+          document.getElementById('feedback').style.color = "#ff0000";
+          document.getElementById('task-answer').disabled = true;
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
