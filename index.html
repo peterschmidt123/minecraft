@@ -87,7 +87,6 @@
         background: 'assets/forest.gif',
         title: 'Úloha 1: Zbieranie potionov',
         context: 'V lese ste z jednej fľaše odobrali 2 diely z 6 a potom ďalšie 3. Koľko dielov fľaše máte spolu?',
-        question: '',
         inputs: ['text'],
         answer: 5/6,
         time: 120
@@ -95,8 +94,7 @@
       {
         background: 'assets/house.gif',
         title: 'Úloha 2: Chýbajúce zlato',
-        context: 'Na vyrobenie zlatej helmy potrebujete 4 diely zo 6, ale máte iba 1 diel. Koľko dielov zlata vám chýba?',
-        question: '',
+        context: 'Na vyrobenie zlatej helmy potrebujete 4 diely zo 6, ale máte iba 1. Koľko dielov zlata vám chýba?',
         inputs: ['text'],
         answer: 3/6,
         time: 120
@@ -112,8 +110,7 @@
       {
         background: 'assets/mining.gif',
         title: 'Úloha 3: Rozdelenie zásob',
-        context: 'Máte 6 dielov zásob. Strážca si vezme 1 diel, vy 2 diely a priateľ tiež 2 diely. Koľko dielov zostane?',
-        question: '',
+        context: 'Máte 6 dielov zásob. Strážca si vezme 1 diel, vy 2 diely a priateľ tiež 2 diely. Koľko dielov ostane?',
         inputs: ['text'],
         answer: 1/6,
         time: 150
@@ -122,7 +119,6 @@
         background: 'assets/portal.gif',
         title: 'Úloha 4: Stavba ohrady',
         context: 'Postavili ste ohradu s rozmermi 5 × 3 bloky. Koľko blokov potrebujete na jej celý obvod?',
-        question: '',
         inputs: ['text'],
         answer: 16,
         time: 90
@@ -131,7 +127,6 @@
         background: 'assets/portal.gif',
         title: 'Úloha 5: Najsilnejší elixír',
         context: 'Máte elixíry s rôznou silou: 2 diely zo 6, 4 diely zo 6 a 3 diely zo 6. Ktorý je najsilnejší?',
-        question: '',
         inputs: ['text'],
         answer: 4/6,
         time: 120
@@ -166,9 +161,7 @@
     }
 
     function showPortalTransition() {
-      // skry úlohu
       taskContainer.classList.add('hidden');
-      // ukáž portál na celú obrazovku
       document.body.style.backgroundImage = "url('assets/portal.gif')";
       setTimeout(loadTask, 1500);
     }
@@ -177,7 +170,6 @@
       const t = tasks[current];
       document.body.style.backgroundImage = `url('${t.background}')`;
       taskContainer.classList.remove('hidden');
-      // odstránenie predchádzajúceho obsahu
       taskContainer.innerHTML = `
         <h2>${t.title}</h2>
         <p>${t.context}</p>
