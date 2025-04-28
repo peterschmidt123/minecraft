@@ -13,22 +13,18 @@
       background-image: url('assets/minecraft.jpg');
       background-size: cover;
       background-position: center;
-      transition: background-image 1s ease-in-out;
+      transition: background-image 1s ease-in-out, transform 1s ease-in-out;
       position: relative;
     }
     .overlay {
       background-color: rgba(0,0,0,0.6);
       position: absolute; top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: 0;
+      width: 100%; height: 100%; z-index: 0;
     }
     .container {
-      position: relative;
-      z-index: 1;
-      max-width: 800px;
-      margin: 3rem auto;
-      padding: 2rem;
-      background-color: rgba(44,62,80,0.85);
+      position: relative; z-index: 1;
+      max-width: 800px; margin: 3rem auto;
+      padding: 2rem; background: rgba(44,62,80,0.85);
       border-radius: 12px;
       box-shadow: 0 0 20px rgba(0,0,0,0.7);
       animation: fadeIn 1s;
@@ -36,22 +32,15 @@
     h1, h2 { color: #00ccff; margin-bottom: 1rem; }
     p { margin-bottom: 1rem; line-height: 1.5; }
     input[type=text] {
-      padding: 0.6rem;
-      width: calc(50% - 1rem);
-      margin-right: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1rem;
+      padding: 0.6rem; width: calc(50% - 1rem);
+      margin-right: 1rem; border: 1px solid #ccc;
+      border-radius: 6px; font-size: 1rem;
     }
     .start-btn, .next-btn, .mute-btn {
-      background-color: #00ccff;
-      color: #1a1a1a;
-      padding: 0.6rem 1.2rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 1rem;
-      transition: transform 0.2s;
+      background: #00ccff; color: #1a1a1a;
+      padding: 0.6rem 1.2rem; border: none;
+      border-radius: 6px; cursor: pointer;
+      margin-top: 1rem; transition: transform 0.2s;
       font-size: 1rem;
     }
     .start-btn:hover, .next-btn:hover, .mute-btn:hover {
@@ -62,8 +51,7 @@
     .click-block {
       width: 100px; height: 100px;
       background: url('assets/diamond_block.png') no-repeat center;
-      background-size: contain;
-      margin: 0 auto;
+      background-size: contain; margin: 0 auto;
       cursor: pointer;
     }
     @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
@@ -72,7 +60,7 @@
 <body>
   <div class="overlay"></div>
 
-  <!-- ambientná hudba, štartuje po kliknutí -->
+  <!-- ambientná hudba -->
   <audio id="bg-music" src="music/ambient.mp3" loop></audio>
   <audio id="success-sound" src="music/success.mp3"></audio>
   <button class="mute-btn" onclick="toggleMute()">🔊</button>
@@ -84,33 +72,33 @@
     <button class="start-btn" onclick="startAdventure()">Začať dobrodružstvo</button>
   </div>
 
-  <!-- Sekcia pre úlohy -->
+  <!-- Úlohy -->
   <div class="container hidden" id="task-container"></div>
 
   <script>
     const tasks = [
       {
         background: 'assets/forest.gif',
-        title: 'Úloha 1: Kombinácia potions',
-        context: 'V lese ste nabrali potiony: 3/8, 2/8 a 1/8 z plnej fľaše. Koľko fľaše máte spolu?',
+        title: 'Úloha 1: Zbieranie potionov',
+        context: 'V lese ste z jednej fľaše nabral 2 diely zo 6, potom ďalšie 3 diely zo 6. Koľko dielov fľaše máte spolu?',
+        question: 'Koľko dielov fľaše máte spolu?',
         inputs: ['text'],
-        question: '3/8 + 2/8 + 1/8 = ?',
-        answer: 6/8,
+        answer: 5/6,
         time: 120
       },
       {
         background: 'assets/house.gif',
         title: 'Úloha 2: Chýbajúce zlato',
-        context: 'Na craft zlatej helmy potrebujete 5/8 zlatej tehly, ale máte iba 3/8. Koľko chýba?',
+        context: 'Na craft zlatej helmy potrebujete 4 diely zo 6, máte iba 1 diel zo 6. Koľko dielov zlata vám chýba?',
+        question: 'Koľko dielov zlata vám chýba?',
         inputs: ['text'],
-        question: '5/8 − 3/8 = ?',
-        answer: 2/8,
+        answer: 3/6,
         time: 120
       },
       {
         background: 'assets/diamond_cave.gif',
         title: 'Minihra: Nájdi diamant',
-        context: 'Klikni na diamantový blok presne 5-krát, aby si ťa našiel zlatý diamant!',
+        context: 'Klikni na diamantový blok presne 5-krát, aby si získal magický diamant!',
         type: 'click',
         clicksRequired: 5,
         time: 60
@@ -118,28 +106,28 @@
       {
         background: 'assets/mining.gif',
         title: 'Úloha 3: Rozdelenie zásob',
-        context: 'Máte 6/6 zásob. Strážca berie 1/6, vy 2/6 a priateľ 2/6. Koľko ostane?',
+        context: 'V lome máte celú fľašu zásob (6 dielov). Strážca si vezme 1 diel, vy 2 diely a priateľ tiež 2 diely. Koľko dielov ostane?',
+        question: 'Koľko dielov ostane?',
         inputs: ['text'],
-        question: '6/6 − (1/6 + 2/6 + 2/6) = ?',
         answer: 1/6,
         time: 150
       },
       {
         background: 'assets/portal.gif',
         title: 'Úloha 4: Stavba ohrady',
-        context: 'Postavili ste obdĺžnikovú ohradu so stranami 7 a 4 bloky. Vypočítajte jej obvod.',
+        context: 'Postavili ste obdĺžnikovú ohradu so stranami 5 a 3 bloky. Koľko blokov potrebujete na celý obvod?',
+        question: 'Koľko blokov potrebujete na obvod?',
         inputs: ['text'],
-        question: '2 × (7 + 4) = ?',
-        answer: 22,
+        answer: 16,
         time: 90
       },
       {
         background: 'assets/portal.gif',
         title: 'Úloha 5: Najsilnejší elixír',
-        context: 'Máte elixíry so sílou 3/9, 5/9 a 2/9. Ktorý je najsilnejší?',
+        context: 'Máte 3 elixíry s rôznou silou: 2 diely zo 6, 4 diely zo 6 a 3 diely zo 6. Ktorý je najsilnejší?',
+        question: 'Koľko dielov zo 6 má najsilnejší elixír?',
         inputs: ['text'],
-        question: 'Najväčší z: 3/9, 5/9, 2/9 = ?',
-        answer: 5/9,
+        answer: 4/6,
         time: 120
       }
     ];
@@ -170,24 +158,22 @@
 
     function loadTask(t) {
       document.body.style.backgroundImage = `url('${t.background}')`;
+      document.body.style.transform = 'rotate(0deg)';
       const tc = document.getElementById('task-container');
       tc.classList.remove('hidden');
       tc.innerHTML = `
         <h2>${t.title}</h2>
         <p>${t.context}</p>
         <p><strong>Otázka:</strong> ${t.question}</p>
-        ${t.type === 'click' ?
-          `<div id="mini-game">
-             <div class="click-block" onclick="handleClick()"></div>
-             <p id="click-count">0 / ${t.clicksRequired}</p>
-           </div>` :
-          `<div id="inputs">
-             ${t.inputs.map((_,i) =>
-               `<input type="text" id="ans${i}" placeholder="Odpoveď">`
-             ).join('')}
-           </div>
-           <button class="next-btn" onclick="checkAnswer()">Skontrolovať</button>`
-        }
+        ${t.type === 'click'
+          ? `<div id="mini-game">
+               <div class="click-block" onclick="handleClick()"></div>
+               <p id="click-count">0 / ${t.clicksRequired}</p>
+             </div>`
+          : `<div id="inputs">
+               ${t.inputs.map((_,i) => `<input type="text" id="ans${i}" placeholder="Odpoveď">`).join('')}
+             </div>
+             <button class="next-btn" onclick="checkAnswer()">Skontrolovať</button>`}
         <div id="feedback"></div>
         <div id="timer"></div>
       `;
@@ -208,8 +194,7 @@
       let ok = true;
       t.inputs.forEach((_,i) => {
         const val = parseFraction(document.getElementById(`ans${i}`).value.trim());
-        const ans = Array.isArray(t.answer) ? t.answer[i] : t.answer;
-        if (Math.abs(val - ans) > 0.01) ok = false;
+        if (Math.abs(val - t.answer) > 0.01) ok = false;
       });
       if (ok) {
         clearInterval(timer);
@@ -220,13 +205,23 @@
     }
 
     function celebrateAndContinue() {
+      // zastav ambientnú hudbu
       bgMusic.pause();
+      // spusti fanfáru
       successSound.currentTime = 0;
       successSound.play();
       successSound.onended = () => {
-        if (!muted) bgMusic.play();
-        document.body.style.backgroundImage = "url('assets/portal.gif')";
-        setTimeout(nextTask, 1500);
+        // animácia portálu: otoč
+        document.body.style.transform = 'rotate(180deg)';
+        setTimeout(() => {
+          // ukáž portál
+          document.body.style.backgroundImage = "url('assets/portal.gif')";
+          // otoč naspäť
+          document.body.style.transform = 'rotate(0deg)';
+          setTimeout(nextTask, 1000);
+        }, 1000);
+        // po fanfáre obnov ambient
+        if (!muted) setTimeout(() => bgMusic.play(), successSound.duration * 1000);
       };
     }
 
@@ -256,7 +251,8 @@
       document.body.style.backgroundImage = "url('assets/celebration.gif')";
       document.getElementById('task-container').innerHTML = `
         <h2>🎉 Úspešne ste aktivovali portál domov! 🎉</h2>
-        <p>Gratulujeme, vaša matematická bystrosť vás zachránila.</p>`;
+        <p>Gratulujeme, vaša matematická bystrosť vás zachránila.</p>
+      `;
     }
   </script>
 </body>
