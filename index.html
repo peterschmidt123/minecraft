@@ -144,11 +144,14 @@ a potom z toho 3/5 použiť na vysokú prednú hradbu, ktorá vás ochráni pred
     }
 
     function showEmbed() {
-      // Skry tasky a zobraz embed
+      // Skry matematickú úlohu
       taskContainer.classList.add('hidden');
-      embedDiv.classList.remove('hidden');
-      // reset pozadie tak, aby portal.gif prestal loopovat
+      // Obnov pozadie na kocky
       document.body.style.backgroundImage = "url('assets/minecraft.jpg')";
+      // Zobraz sekciu s tlačidlom pre ďalšiu úlohu
+      embedDiv.classList.remove('hidden');
+      // Automaticky otvor Minecraft Classic v novej karte
+      window.open('https://classic.minecraft.net/', '_blank');
     }
 
     function endEmbed() {
