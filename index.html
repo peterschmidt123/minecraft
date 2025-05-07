@@ -53,18 +53,18 @@
 
   <!-- Minecraft Classic embed -->
   <div class="container hidden" id="minecraft-embed">
-    <h2>Mini-hra: Minecraft Classic</h2>
-    <p>Pre krátku prestávku otvorte Minecraft Classic v novej karte:</p>
-    <a href="https://classic.minecraft.net/" target="_blank" rel="noopener noreferrer" class="start-btn">
-      Otvoriť Minecraft Classic
-    </a>
+    <!-- Next button appears after opening Minecraft Classic -->
     <button class="next-btn" onclick="endEmbed()">Ďalšia úloha</button>
   </div>
 
   <script>
     const tasks = [
       { background: 'assets/forest.gif', title: 'Úloha 1: Stavba tvrze (pätiny + obvod)',
-        context: `Miesto: Čerstvo vyrúbaná lúka pri okraji lesa\nPríbeh:\nLesníci vám pripravili plány hradu s hradbou dlhšou 4 a 6 blokov.\nPotrebujete najprv zmerať, koľko blokov budete potrebovať na celý obvod,\na potom z toho 3/5 použiť na vysokú prednú hradbu, ktorá vás ochráni pred mobmi.`,
+        context: `Miesto: Čerstvo vyrúbaná lúka pri okraji lesa
+Príbeh:
+Lesníci vám pripravili plány hradu s hradbou dlhšou 4 a 6 blokov.
+Potrebujete najprv zmerať, koľko blokov budete potrebovať na celý obvod,
+a potom z toho 3/5 použiť na vysokú prednú hradbu, ktorá vás ochráni pred mobmi.`,
         inputs: ['text','text'], answer: [20,12], time: 150 },
       /* ďalšie úlohy definujte tu */
     ];
@@ -85,7 +85,8 @@
       intro.classList.add('hidden');
       bgMusic.play();
       current = 0;
-      showPortal();
+      // načíta okamžite prvú úlohu bez ďalšej portálovej animácie
+      loadTask();
     }
 
     function nextTask() {
@@ -93,6 +94,7 @@
       taskContainer.classList.add('hidden');
       current++;
       if (current >= tasks.length) return finishAdventure();
+      // prechod portálom pred ďalšou úlohou
       showPortal();
     }
 
@@ -142,14 +144,11 @@
     }
 
     function showEmbed() {
+      // Skry tasky a zobraz embed
       taskContainer.classList.add('hidden');
       embedDiv.classList.remove('hidden');
-    }
-
-    function openMinecraft() {
-      window.open('https://classic.minecraft.net/', '_blank');
-      document.getElementById('open-btn').classList.add('hidden');
-      document.getElementById('minecraft-next').classList.remove('hidden');
+      // reset pozadie tak, aby portal.gif prestal loopovat
+      document.body.style.backgroundImage = "url('assets/minecraft.jpg')";
     }
 
     function endEmbed() {
@@ -184,7 +183,7 @@
       document.body.style.backgroundImage = "url('assets/celebration.gif')";
       taskContainer.innerHTML = `
         <h2>🎉 Portál je aktivovaný! 🎉</h2>
-        <p>Po správnom vyriešení všetkých úloh sa portál rozzári a vy ste zachránení! Vráťte sa domov!</p>
+        <p>Po správnom vyriešení všetkých úloh sa portál rozzári a vy ste zachránení! Vráťte sa domov!</p>
       `;
       taskContainer.classList.remove('hidden');
     }
