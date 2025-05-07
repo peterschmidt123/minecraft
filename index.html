@@ -1,13 +1,82 @@
-<!-- Počúva sa matematická úloha, potom… -->
-<div class="container hidden" id="task-container"></div>
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Escape Room: Minecraft Zlomky</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #f2f2f2;
+      background: url('assets/minecraft.jpg') center/cover no-repeat;
+      position: relative;
+      transition: background-image 1s ease-in-out;
+    }
+    .overlay { background: rgba(0,0,0,0.6); position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+    .container { position: relative; z-index: 1; max-width: 800px; margin: 3rem auto; padding: 2rem; background: rgba(44,62,80,0.85); border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.7); animation: fadeIn 1s; }
+    h1, h2 { color: #00ccff; margin-bottom: 1rem; }
+    p, pre { margin-bottom: 1rem; line-height: 1.5; white-space: pre-wrap; }
+    input[type=text] { padding: 0.6rem; width: calc(50% - 1rem); margin-right: 1rem; border-radius: 6px; border: 1px solid #ccc; font-size: 1rem; }
+    .start-btn, .next-btn, .mute-btn { background: #00ccff; color: #1a1a1a; border: none; border-radius: 6px; padding: 0.6rem 1.2rem; cursor: pointer; margin-top: 1rem; font-size: 1rem; transition: transform .2s; }
+    .start-btn:hover, .next-btn:hover, .mute-btn:hover { transform: scale(1.05); }
+    .mute-btn { position: fixed; top: 10px; right: 10px; z-index: 2; }
+    #timer { margin-top: 1rem; font-weight: bold; }
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+    .hidden { display: none !important; }
+    #minecraft-embed { display: none; }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
 
-<!-- Tu sa zobrazí iframe s Minecraft Classic -->
-<div class="container" id="minecraft-embed">
-  <h2>Mini-hra: Minecraft Classic</h2>
-  <p>Pre krátku prestávku si zahrajte Minecraft Classic:</p>
-  <iframe
-    src="https://classic.minecraft.net/"
-    style="width:100%; height:500px; border:none; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.7);">
-  </iframe>
-  <button class="next-btn" onclick="endEmbed()">Ďalšia úloha</button>
-</div>
+  <!-- Zvuky -->
+  <audio id="bg-music" src="music/ambient.mp3" loop></audio>
+  <audio id="success-sound" src="music/success.mp3"></audio>
+  <button class="mute-btn" onclick="toggleMute()">🔊</button>
+
+  <!-- Prológ -->
+  <div class="container" id="intro">
+    <h1>Prológ: Vtiahnutie do sveta Minecraft</h1>
+    <p>V škole ste náhodou objavili ukrytý portál, ktorý vás preniesol do neznámeho kúta Minecraftu. Okolo vás sa rozprestiera divoký les, nad vami sa blýska tmavá obloha a čoskoro príde noc. Vašou jedinou šancou na návrat je postupne plniť matematické úlohy, ktoré aktivujú magické kamene v okolí a nakoniec otvoria portál domov.</p>
+    <button class="start-btn" onclick="startAdventure()">Začať dobrodružstvo</button>
+  </div>
+
+  <!-- Úlohy a Embed -->
+  <div class="container hidden" id="task-container"></div>
+  <div class="container" id="minecraft-embed">
+    <h2>Mini-hra: Minecraft Classic</h2>
+    <p>Pre krátku prestávku si zahrajte Minecraft Classic:</p>
+    <iframe src="https://classic.minecraft.net/" style="width:100%; height:500px; border:none; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.7);"></iframe>
+    <button class="next-btn" onclick="endEmbed()">Ďalšia úloha</button>
+  </div>
+
+  <script>
+    const tasks=[
+      {background:'assets/forest.gif',title:'Úloha 1: Stavba tvrze (pätiny + obvod)',context:`Miesto: Čerstvo vyrúbaná lúka pri okraji lesa\nPríbeh:\nLesníci vám pripravili plány hradu s hradbou dlhšou 4 a 6 blokov.\nPotrebujete najprv zmerať, koľko blokov budete potrebovať na celý obvod,\na potom z toho 3/5 použiť na vysokú prednú hradbu, ktorá vás ochráni pred mobmi.`,inputs:['text','text'],answer:[20,12],time:150},
+      /* ďalšie úlohy */
+    ];
+    let current=-1,timer,muted=false;
+    const intro=document.getElementById('intro'),taskContainer=document.getElementById('task-container'),embed=document.getElementById('minecraft-embed'),bgMusic=document.getElementById('bg-music'),successSound=document.getElementById('success-sound');
+    function toggleMute(){muted=!muted;[bgMusic,successSound].forEach(a=>a.muted=muted);document.querySelector('.mute-btn').textContent=muted?'🔇':'🔊';}
+    function startAdventure() {
+      intro.classList.add('hidden');
+      bgMusic.play();
+      current = 0;
+      // spusti portal animaciu pred prvou ulohou
+      showPortal();
+    }
+    function nextTask(){embed.style.display='none';current++;if(current>=tasks.length)return finishAdventure();showPortal();}
+    function showPortal(){taskContainer.classList.add('hidden');document.body.style.backgroundImage="url('assets/portal.gif')";setTimeout(loadTask,1500);}
+    function loadTask(){const t=tasks[current];document.body.style.backgroundImage=`url('${t.background}')`;taskContainer.classList.remove('hidden');taskContainer.innerHTML=`<h2>${t.title}</h2><pre>${t.context}</pre><div id="inputs">${t.inputs.map((_,i)=>`<input type="text" id="ans${i}" placeholder="Odpoveď">`).join('')}</div><button class="next-btn" onclick="checkAnswer()">Skontrolovať</button><div id="feedback"></div><div id="timer"></div>`;startTimer(t.time);}
+    function checkAnswer(){const t=tasks[current];let ok=true;t.inputs.forEach((_,i)=>{const v=parseFraction(document.getElementById(`ans${i}`).value.trim()),a=Array.isArray(t.answer)?t.answer[i]:t.answer;if(Math.abs(v-a)>0.01)ok=false;});if(ok)celebrate();else document.getElementById('feedback').textContent='❌ Skús znova';}
+    function celebrate(){clearInterval(timer);bgMusic.pause();successSound.currentTime=0;successSound.play();successSound.onended=()=>{if(!muted)bgMusic.play();showEmbed();};}
+    function showEmbed(){taskContainer.classList.add('hidden');embed.style.display='block';}
+    function endEmbed(){embed.style.display='none';nextTask();}
+    function startTimer(s){clearInterval(timer);let sec=s;document.getElementById('timer').textContent=`⏱️ ${sec}s`;timer=setInterval(()=>{sec--;document.getElementById('timer').textContent=`⏱️ ${sec}s`;if(sec<=0){clearInterval(timer);document.getElementById('feedback').textContent='⛔ čas vypršal';}},1000);}
+    function parseFraction(s){if(s.includes('/')){const[n,d]=s.split('/').map(Number);return n/d;}return s===''?0:parseFloat(s);}    
+    function finishAdventure(){taskContainer.classList.add('hidden');document.body.style.backgroundImage="url('assets/celebration.gif')";taskContainer.innerHTML=`<h2>🎉 Portál je aktivovaný! 🎉</h2><p>Po správnom vyriešení všetkých úloh sa portál rozzári a vy ste zachránení! Vráťte sa domov!</p>`;taskContainer.classList.remove('hidden');}
+  </script>
+</body>
+</html>
