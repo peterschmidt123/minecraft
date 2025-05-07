@@ -47,9 +47,11 @@
   <div class="container hidden" id="task-container"></div>
   <div class="container" id="minecraft-embed">
     <h2>Mini-hra: Minecraft Classic</h2>
-    <p>Pre krátku prestávku si zahrajte Minecraft Classic:</p>
-    <iframe src="https://classic.minecraft.net/" style="width:100%; height:500px; border:none; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.7);"></iframe>
-    <button class="next-btn" onclick="endEmbed()">Ďalšia úloha</button>
+    <p>Pre krátku prestávku kliknite na tlačidlo, ktoré otvorí Minecraft Classic v novej karte:</p>
+    <button class="start-btn" onclick="openMinecraft()">Otvoriť Minecraft Classic</button>
+    <div id="minecraft-next" class="hidden">
+      <button class="next-btn" onclick="endEmbed()">Ďalšia úloha</button>
+    </div>
   </div>
 
   <script>
