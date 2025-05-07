@@ -119,7 +119,115 @@
   </div>
 
   <script>
-    const tasks = [ /* úlohy s miniGame */ ];
+    const tasks = [
+      {
+        background: 'assets/forest.gif',
+        title: 'Úloha 1: Stavba tvrze (pätiny + obvod)',
+        context: `Miesto: Čerstvo vyrúbaná lúka pri okraji lesa
+Príbeh:
+Lesníci vám pripravili plány hradu s hradbou dlhšou 4 a 6 blokov.
+Potrebujete najprv zmerať, koľko blokov budete potrebovať na celý obvod,
+a potom z toho 3/5 použiť na vysokú prednú hradbu, ktorá vás ochráni pred mobmi.`,
+        inputs: ['text','text'],
+        answer: [20,12],
+        time: 150,
+        miniGame: { type: 'build', required: 5 }
+      },
+      {
+        background: 'assets/house.gif',
+        title: 'Úloha 2: Diamantové turnaje (šestiny + priemer)',
+        context: `Miesto: Vchod do starej bane, hlboko pod tvrďou
+Príbeh:
+Keď hradba stojí, nájdete v bani 12 lesklých diamantov.
+Prvú hodinu ste získali 2/6 z celku, druhú 1/6.
+Spočítajte, koľko diamantov máte spolu a aký je priemerný zisk za hodinu.`,
+        inputs: ['text','text'],
+        answer: [6,3],
+        time: 180,
+        miniGame: { type: 'mine', required: 5 }
+      },
+      {
+        background: 'assets/mining.gif',
+        title: 'Úloha 3: Nočná lúka (osminy + plocha)',
+        context: `Miesto: Vyľakaná lúka pred baníckou šachtou
+Príbeh:
+Za bránou bane sa ocitnete na malej lúke 8 × 5 blokov.
+V noci z nej preletia hordy netopierov a odľahnú 3/8 celej plochy.
+Musíte vypočítať, akú rozlohu lúky tvorí plná plocha a koľko blokov vám zostalo.`,
+        inputs: ['text','text'],
+        answer: [40,25],
+        time: 150,
+        miniGame: { type: 'build', required: 5 }
+      },
+      {
+        background: 'assets/furnace.gif',
+        title: 'Úloha 4: Drevené dosky (polovice + násobenie)',
+        context: `Miesto: Stará dielňa s pecami
+Príbeh:
+Lúka vás privedie k dielni, kde sú stohy kmeňov dreva.
+Máte 20 kmeňov, polovicu z nich spracujete na dosky,
+pričom z každého kmeňa získate 4 dosky.
+Koľko dosiek celkom vyrobíte?`,
+        inputs: ['text'],
+        answer: [40],
+        time: 120,
+        miniGame: { type: 'mine', required: 5 }
+      },
+      {
+        background: 'assets/portal.gif',
+        title: 'Úloha 5: Semená úspechu (štvrtiny + obsah)',
+        context: `Miesto: Skrytá farmička za dielňou
+Príbeh:
+Z dielne prichádzate k opustenej farme s veľkým obdĺžnikovým políčkom 12 × 8 blokov.
+Starý záhradník nechal semienka len na 1/4 plochy.
+Ak chcete políčko oživiť a získať od neho elixír zdravia,
+musíte vypočítať, koľko blokov je zasadených semienkami.`,
+        inputs: ['text'],
+        answer: [24],
+        time: 120,
+        miniGame: { type: 'build', required: 5 }
+      },
+      {
+        background: 'assets/forest.gif',
+        title: 'Úloha 6: Pločinky z jabĺk (štvrtiny + sčítanie)',
+        context: `Miesto: Kuchyňa farmy, kde visia košíky jabĺk
+Príbeh:
+Na jednu placku potrebujete 3/4 hrnca jabĺk a 1/4 hrnca múky.
+Pripravujete dve placky, aby ste sa posilnili pred nočným stretnutím s mobmi.
+Musíte spočítať, koľko hrncov jabĺk a múky na to miniete.`,
+        inputs: ['text','text'],
+        answer: [1.5,0.5],
+        time: 150,
+        miniGame: { type: 'mine', required: 5 }
+      },
+      {
+        background: 'assets/diamond_cave.gif',
+        title: 'Úloha 7: Redstone brány (tretiny + sčítanie)',
+        context: `Miesto: Vežička so zložitým redstone zapojením
+Príbeh:
+Vo vežičke sú dve redstone brány.
+Prvá potrebuje 1/3 jednotky redstone prášku, druhá 2/3 jednotky.
+Keď spočítate, koľko redstone potrebujete spolu, otvorí sa spodná mriežka schodov vedúcich k portálu.`,
+        inputs: ['text'],
+        answer: [1],
+        time: 90,
+        miniGame: { type: 'build', required: 5 }
+      },
+      {
+        background: 'assets/portal.gif',
+        title: 'Úloha 8: Finálna energia (pätiny + sčítanie)',
+        context: `Miesto: Spodný sál s portálom domov
+Príbeh:
+Ste u portálu, ale chýba mu energia.
+Fragmenty energie sú v troch kruhových komorách s množstvami 1/5, 2/5 a 2/5 jednotky.
+Musíte spočítať ich súčet, aktivovať portálové kamene a vrátiť sa späť do školy!`,
+        inputs: ['text'],
+        answer: [1],
+        time: 120,
+        miniGame: { type: 'mine', required: 5 }
+      }
+    ];
+
     let current = -1, timer, muted = false;
     const intro = document.getElementById('intro');
     const taskContainer = document.getElementById('task-container');
@@ -189,7 +297,6 @@
       successSound.currentTime = 0; successSound.play();
       successSound.onended = () => {
         if (!muted) bgMusic.play();
-        // najskôr miniGame ak existuje
         const mg = tasks[current].miniGame;
         if (mg) showMiniGame(mg);
         else showEmbed();
@@ -214,19 +321,19 @@
         block.onclick = () => {
           block.classList.add('shake');
           breakSound.currentTime = 0; breakSound.play();
-          if (++count <= required) display.textContent = `${count} / ${required}`;
-          if (count >= required) { mgDiv.remove(); showEmbed(); }
+          if (++count <= required) display.textContent = `${count} / ${	required}`;
+          if (count >=	required) { mgDiv.remove();	showEmbed();	}
         };
       } else {
         mgDiv.innerHTML = `
           <h2>Stavba steny</h2>
           <p>Postav ${required} kamenných blokov!</p>
-          <div id="build-count">0 / ${required}</div>
+          <div id="build-count">0 / ${	required}</div>
           <div class="build-grid" id="build-grid"></div>
         `;
         let built = 0;
-        const grid = mgDiv.querySelector('#build-grid');
-        const display = mgDiv.querySelector('#build-count');
+        const grid = mgDiv.querySelector('#	build-grid');
+        const display = mgDiv.querySelector('#	build-count');
         for (let i = 0; i < required; i++) {
           const cell = document.createElement('div');
           cell.className = 'build-cell';
@@ -234,8 +341,8 @@
             if (!cell.classList.contains('filled')) {
               cell.classList.add('filled');
               placeSound.currentTime = 0; placeSound.play();
-              display.textContent = `${++built} / ${required}`;
-              if (built >= required) { mgDiv.remove(); showEmbed(); }
+              display.textContent = `${++built} / ${	required}`;
+              if (built >=	required) { mgDiv.remove();	showEmbed(); }
             }
           };
           grid.appendChild(cell);
