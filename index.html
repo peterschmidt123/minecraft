@@ -89,7 +89,7 @@
   <audio id="success-sound" src="music/success.mp3"></audio>
   <audio id="break-sound" src="music/break.mp3"></audio>
   <audio id="place-sound" src="music/place.mp3"></audio>
-  <button class="mute-btn">🔊</button>
+  <button class="mute-btn" onclick="toggleMute()">🔊</button>
 
   <!-- Prológ -->
   <div class="container" id="intro">
@@ -100,50 +100,44 @@
       Vašou jedinou šancou na návrat je postupne plniť matematické úlohy, ktoré aktivujú magické kamene
       v okolí a nakoniec otvoria portál domov.
     </p>
-    <button class="start-btn">Začať dobrodružstvo</button>
+    <button class="start-btn" onclick="startAdventure()">Začať dobrodružstvo</button>
   </div>
 
   <!-- Úlohy -->
   <div class="container hidden" id="task-container"></div>
 
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const tasks = [ /* pôvodné definície úloh s miniGame */ ];
-      let current = -1, timer, muted = false;
-      const intro = document.getElementById('intro');
-      const taskContainer = document.getElementById('task-container');
-      const bgMusic = document.getElementById('bg-music');
-      const successSound = document.getElementById('success-sound');
-      const breakSound = document.getElementById('break-sound');
-      const placeSound = document.getElementById('place-sound');
-      const muteBtn = document.querySelector('.mute-btn');
-      const startBtn = document.querySelector('.start-btn');
-      startBtn.addEventListener('click', startAdventure);
-      muteBtn.addEventListener('click', toggleMute);
+    const tasks = [ /* definície úloh vrátane miniGame */ ];
+    let current = -1, timer, muted = false;
+    const intro = document.getElementById('intro');
+    const taskContainer = document.getElementById('task-container');
+    const bgMusic = document.getElementById('bg-music');
+    const successSound = document.getElementById('success-sound');
+    const breakSound = document.getElementById('break-sound');
+    const placeSound = document.getElementById('place-sound');
 
-      function toggleMute() {
-        muted = !muted;
-        [bgMusic, successSound, breakSound, placeSound].forEach(a => a.muted = muted);
-        muteBtn.textContent = muted ? '🔇' : '🔊';
-      }
+    function toggleMute() {
+      muted = !muted;
+      [bgMusic, successSound, breakSound, placeSound].forEach(a => a.muted = muted);
+      document.querySelector('.mute-btn').textContent = muted ? '🔇' : '🔊';
+    }
 
-      function startAdventure() {
-        intro.classList.add('hidden');
-        bgMusic.play();
-        nextTask();
-      }
+    function startAdventure() {
+      intro.classList.add('hidden');
+      bgMusic.play();
+      nextTask();
+    }
 
-      function nextTask() { /* ... */ }
-      function showPortalTransition() { /* ... */ }
-      function loadTask() { /* ... */ }
-      function checkAnswer() { /* ... */ }
-      function celebrateAndContinue() { /* ... */ }
-      function showMiniGame(mg) { /* ... */ }
-      function finishMiniGame(mg) { /* ... */ }
-      function startTimer(sec) { /* ... */ }
-      function parseFraction(s) { /* ... */ }
-      function finishAdventure() { /* ... */ }
-    });
+    function nextTask() { /* ... pôvodné funkcie ... */ }
+    function showPortalTransition() { /* ... */ }
+    function loadTask() { /* ... */ }
+    function checkAnswer() { /* ... */ }
+    function celebrateAndContinue() { /* ... */ }
+    function showMiniGame(mg) { /* ... */ }
+    function finishMiniGame(mgDiv) { /* ... */ }
+    function startTimer(sec) { /* ... */ }
+    function parseFraction(s) { /* ... */ }
+    function finishAdventure() { /* ... */ }
   </script>
 </body>
 </html>
