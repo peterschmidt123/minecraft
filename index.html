@@ -25,7 +25,6 @@
     #timer { margin-top: 1rem; font-weight: bold; }
     @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
     .hidden { display: none !important; }
-    #minecraft-embed { display: none; }
   </style>
 </head>
 <body>
@@ -55,8 +54,8 @@
   <div class="container hidden" id="minecraft-embed">
     <h2>Mini-hra: Minecraft Classic</h2>
     <p>
-      Otvorte Minecraft Classic v novej karte a splňte krátku úlohu (napr. postavte malú stenu alebo vyťažte pár blokov).
-      Po dokončení sa vráťte sem a pokračujte stlačením tlačidla.
+      Otvorte Minecraft Classic v novej karte a splňte krátku úlohu (postavte malú stenu alebo vyťažte pár blokov).
+      Po dokončení sa vráťte sem a kliknite na Ďalšia úloha.
     </p>
     <a href="https://classic.minecraft.net/" target="_blank" rel="noopener noreferrer" class="start-btn">
       Otvoriť Minecraft Classic
@@ -67,14 +66,10 @@
   <script>
     const tasks = [
       { background: 'assets/forest.gif', title: 'Úloha 1: Stavba tvrze (pätiny + obvod)',
-        context: `Miesto: Čerstvo vyrúbaná lúka pri okraji lesa
-Príbeh:
-Lesníci vám pripravili plány hradu s hradbou dlhšou 4 a 6 blokov.
-Potrebujete najprv zmerať, koľko blokov budete potrebovať na celý obvod,
-a potom z toho 3/5 použiť na vysokú prednú hradbu, ktorá vás ochráni pred mobmi.`,
-        inputs: ['text','text'], answer: [20,12], time: 150 },
-      /* ďalšie úlohy definujte tu */
+        context: `Miesto: Čerstvo vyrúbaná lúka pri okraji lesa\nPríbeh:\nLesníci vám pripravili plány hradu s hradbou dlhšou 4 a 6 blokov.\nPotrebujete najprv zmerať, koľko blokov budete potrebovať na celý obvod,\na potom z toho 3/5 použiť na vysokú prednú hradbu, ktorá vás ochráni pred mobmi.`, inputs: ['text','text'], answer: [20,12], time: 150 },
+      // ... pridajte ďalšie úlohy tu (Úloha 2, Úloha 3, ... Úloha 8)
     ];
+
     let current = -1, timer, muted = false;
     const intro = document.getElementById('intro');
     const taskContainer = document.getElementById('task-container');
@@ -92,7 +87,6 @@ a potom z toho 3/5 použiť na vysokú prednú hradbu, ktorá vás ochráni pred
       intro.classList.add('hidden');
       bgMusic.play();
       current = 0;
-      // načíta okamžite prvú úlohu bez ďalšej portálovej animácie
       loadTask();
     }
 
@@ -101,7 +95,6 @@ a potom z toho 3/5 použiť na vysokú prednú hradbu, ktorá vás ochráni pred
       taskContainer.classList.add('hidden');
       current++;
       if (current >= tasks.length) return finishAdventure();
-      // prechod portálom pred ďalšou úlohou
       showPortal();
     }
 
@@ -151,14 +144,9 @@ a potom z toho 3/5 použiť na vysokú prednú hradbu, ktorá vás ochráni pred
     }
 
     function showEmbed() {
-      // Skry matematickú úlohu
       taskContainer.classList.add('hidden');
-      // Obnov pozadie na kocky
       document.body.style.backgroundImage = "url('assets/minecraft.jpg')";
-      // Zobraz sekciu s tlačidlom pre ďalšiu úlohu
       embedDiv.classList.remove('hidden');
-      // Automaticky otvor Minecraft Classic v novej karte
-      window.open('https://classic.minecraft.net/', '_blank');
     }
 
     function endEmbed() {
